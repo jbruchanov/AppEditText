@@ -1,5 +1,6 @@
 package com.scurab.android.appedittext
 
+import TextDrawable
 import android.content.Context
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
@@ -35,6 +36,16 @@ class MainActivity : AppCompatActivity() {
         findViewById<AppEditText>(R.id.clear_text).apply {
             setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.ClearButton())
             setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_clear, 0)
+        }
+
+        findViewById<AppEditText>(R.id.prefix).apply {
+            setCompoundDrawablesWithIntrinsicBounds(
+                TextDrawable("Prefix$", this@MainActivity, R.style.AppTheme),
+                null,
+                resources.getDrawable(R.drawable.ic_clear, theme),
+                null
+            )
+            setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.ClearButton())
         }
     }
 }
