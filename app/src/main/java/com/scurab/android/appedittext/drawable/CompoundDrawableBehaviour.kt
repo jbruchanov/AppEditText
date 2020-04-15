@@ -1,5 +1,6 @@
 package com.scurab.android.appedittext.drawable
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -126,11 +127,31 @@ abstract class CompoundDrawableBehaviour private constructor(
                 if (isEmpty xor wasEmpty) {
                     //cancels ripple effect, it would appear when shown again
                     drawable?.jumpToCurrentState()
-                    virtualView.host.setCompoundDrawable(
-                        virtualView.id,
-                        if (isEmpty) null else drawable
-                    )
+                    dispatchUpdateDrawable(if (isEmpty) null else drawable)
                 }
+            }
+        }
+
+        open fun dispatchUpdateDrawable(drawable: Drawable?) {
+            virtualView.host.setCompoundDrawable(
+                virtualView.id,
+                drawable
+            )
+        }
+
+        fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            //pick the predefined or from view
+            //doesn't have to be known in onAttach
+            drawable = drawable ?: virtualView.drawable
+            val isEmpty = s?.length == 0
+            val wasEmpty = before == 0
+            if (isEmpty xor wasEmpty) {
+                //cancels ripple effect, it would appear when shown again
+                drawable?.jumpToCurrentState()
+                virtualView.host.setCompoundDrawable(
+                    virtualView.id,
+                    if (isEmpty) null else drawable
+                )
             }
         }
 

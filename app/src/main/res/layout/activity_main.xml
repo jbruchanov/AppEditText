@@ -76,5 +76,20 @@
             tools:background="#"
             android:text="Hello World!" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/simpleButton"
+            android:text="Error when empty"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:drawablePadding="4dp"
+            tools:background="#"
+            android:text="Hello World!" />
+
     </LinearLayout>
 </ScrollView>

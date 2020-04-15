@@ -2,6 +2,7 @@ package com.scurab.android.appedittext
 
 import TextDrawable
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -46,6 +47,16 @@ class MainActivity : AppCompatActivity() {
                 null
             )
             setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.ClearButton())
+        }
+
+        findViewById<AppEditText>(R.id.error).let {editText ->
+            editText.setCompoundDrawableBehaviour(2, object : CompoundDrawableBehaviour.ClearButton() {
+                override fun dispatchUpdateDrawable(drawable: Drawable?) {
+                    super.dispatchUpdateDrawable(drawable)
+                    editText.isInError = drawable == null
+                }
+            })
+            editText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_clear, 0)
         }
     }
 }

@@ -22,6 +22,14 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         R.attr.editTextStyle
     )
 
+    var isInError: Boolean = false
+        set(value) {
+            if (value != field) {
+                field = value
+                refreshDrawableState()
+            }
+        }
+
     //intentionally nullable, as we can't guarantee nonnull value because of overridden
     //function calls through ctor
     @Suppress("LeakingThis")
@@ -34,9 +42,10 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
             ViewCompat.setAccessibilityDelegate(this, CompoundDrawablesAccessibilityDelegate(it))
         }
 
-    private val compoundDrawablesAccessibilityDelegate = CompoundDrawablesAccessibilityDelegate(compoundDrawablesController).also {
-        ViewCompat.setAccessibilityDelegate(this, it)
-    }
+    private val compoundDrawablesAccessibilityDelegate =
+        CompoundDrawablesAccessibilityDelegate(compoundDrawablesController).also {
+            ViewCompat.setAccessibilityDelegate(this, it)
+        }
 
     fun setCompoundDrawableBehaviour(index: Int, behaviour: ICompoundDrawableBehaviour) {
         compoundDrawablesController.setCompoundDrawableClickStrategy(index, behaviour)
@@ -71,6 +80,12 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         val onTouchEvent = compoundDrawablesController.dispatchTouchEvent(event) ?: false
         return onTouchEvent || super.dispatchTouchEvent(event)
+    }
+
+    override fun onCreateDrawableState(extraSpace: Int): IntArray {
+        val state = super.onCreateDrawableState(extraSpace + 1)
+        state[state.size - 1] = R.attr.state_error * isInError.sign()
+        return state
     }
 
     //region a11y

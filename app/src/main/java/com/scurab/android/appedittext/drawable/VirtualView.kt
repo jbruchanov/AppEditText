@@ -3,6 +3,7 @@ package com.scurab.android.appedittext.drawable
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.widget.TextView
+import com.scurab.android.appedittext.sign
 import kotlin.math.roundToInt
 
 class VirtualView(val id: Int, val host: TextView) {
@@ -75,9 +76,6 @@ class VirtualView(val id: Int, val host: TextView) {
             it.isStateLocked = true
         }
     }
-
-    private fun Boolean.sign() = if (this) 1 else -1
-
     fun invalidateDrawableState() {
         drawable?.let {
             if (it.setState(state(false))) {
