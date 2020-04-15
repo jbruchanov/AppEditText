@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="action_show_password" type="id" />
+    <item name="action_hide_password" type="id" />
+    <item name="action_announce_password" type="id" />
+</resources>
