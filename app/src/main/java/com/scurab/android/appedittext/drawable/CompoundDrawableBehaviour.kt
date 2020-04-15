@@ -139,22 +139,6 @@ abstract class CompoundDrawableBehaviour private constructor(
             )
         }
 
-        fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            //pick the predefined or from view
-            //doesn't have to be known in onAttach
-            drawable = drawable ?: virtualView.drawable
-            val isEmpty = s?.length == 0
-            val wasEmpty = before == 0
-            if (isEmpty xor wasEmpty) {
-                //cancels ripple effect, it would appear when shown again
-                drawable?.jumpToCurrentState()
-                virtualView.host.setCompoundDrawable(
-                    virtualView.id,
-                    if (isEmpty) null else drawable
-                )
-            }
-        }
-
         override fun onClick() {
             virtualView.host.text = ""
             //unclear what to do ?
