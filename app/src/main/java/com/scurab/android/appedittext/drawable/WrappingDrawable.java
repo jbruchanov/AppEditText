@@ -16,8 +16,6 @@
 
 package com.scurab.android.appedittext.drawable;
 
-import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
-
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -29,6 +27,8 @@ import android.view.View;
 
 import androidx.annotation.RestrictTo;
 import androidx.core.graphics.drawable.DrawableCompat;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 
 /**
  * Copied from google, need setStateLocked
@@ -97,9 +97,12 @@ public class WrappingDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean setState(final int[] stateSet) {
-        if (mLockedState) {
-            return false;
-        }
+        //ignore states from default call stack
+        //we need to ignore states coming from edittext, we have different states
+        return false;
+    }
+
+    public boolean setStateReal(final int[] stateSet) {
         return mDrawable.setState(stateSet);
     }
 
@@ -246,11 +249,12 @@ public class WrappingDrawable extends Drawable implements Drawable.Callback {
         this.mLockedState = mLockedState;
     }
 
+
     public static WrappingDrawable wrapped(Drawable drawable) {
         if (drawable instanceof WrappingDrawable) {
             return (WrappingDrawable) drawable;
         } else {
-            WrappingDrawable wrapper = new WrappingDrawable(drawable);
+            WrappingDrawable wrapper = new WrappingDrawable(drawable/*.mutate()*/);
             wrapper.setBounds(drawable.getDirtyBounds());
             return wrapper;
         }

@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:drawableLeft="@drawable/ic_baseline_adjust_24"
+            android:drawableLeft="@drawable/ic_baseline_password_visible_24"
             android:drawableRight="@drawable/ic_arrow_right"
             android:drawableBottom="@drawable/ic_dropdown"
             android:drawablePadding="4dp"

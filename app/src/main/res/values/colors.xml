@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#FF5722</color>
+    <color name="colorAccent">#009688</color>
 
     <color name="input_field_disabled_filling">#DDD</color>
     <color name="input_field_disabled_error_filling">#FDD</color>

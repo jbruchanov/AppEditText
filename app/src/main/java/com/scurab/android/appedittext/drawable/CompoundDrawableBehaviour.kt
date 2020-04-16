@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
-import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.setCompoundDrawable
 
@@ -113,7 +112,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
     }
 
-    open class ClearButton : CompoundDrawableBehaviour(R.string.a11y_action_clear_text) {
+    abstract class HideOnEmptyTextBehaviour(@StringRes contentDescription: Int) : CompoundDrawableBehaviour(contentDescription) {
         private var drawable: WrappingDrawable? = null
         private val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -140,12 +139,6 @@ abstract class CompoundDrawableBehaviour private constructor(
             )
         }
 
-        override fun onClick() {
-            virtualView.host.text = ""
-            //unclear what to do ?
-            virtualView.host.post { virtualView.host.requestFocusFromTouch() }
-        }
-
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
             virtualView.host.addTextChangedListener(textWatcher)
@@ -158,10 +151,19 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
     }
 
-    open class ToggleButton : CompoundDrawableBehaviour() {
+    open class ClearButton : HideOnEmptyTextBehaviour(R.string.a11y_action_clear_text) {
+        override fun onClick() {
+            virtualView.host.text = ""
+            //unclear what to do ?
+            virtualView.host.post { virtualView.host.requestFocusFromTouch() }
+        }
+    }
+
+    abstract class ToggleButton(private val clickHandler: (Int, TextView, Boolean) -> Unit) : CompoundDrawableBehaviour() {
         override fun onClick() {
             virtualView.isChecked = !virtualView.isChecked
             virtualView.invalidateDrawableState()
+            clickHandler(virtualView.id, virtualView.host, virtualView.isChecked)
         }
 
         override fun onAttach(virtualView: VirtualView) {
@@ -176,20 +178,31 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
     }
 
-    open class PasswordButton(private val isCheckedByDefault: Boolean = true) : ToggleButton() {
+    open class PasswordButton() : HideOnEmptyTextBehaviour(R.string.app_name/*TODO:*/) {
         private val TextView.hasPasswordVisible get() = this.transformationMethod is PasswordTransformationMethod
         private val passwordMethod = PasswordTransformationMethod.getInstance()
+
         override fun onClick() {
-            super.onClick()
-            virtualView.host.apply {
-                transformationMethod = if (hasPasswordVisible) null else passwordMethod
-                (this as? EditText)?.setSelection(text.length)
+            virtualView.apply {
+                val newMethod = if (host.hasPasswordVisible) null else passwordMethod
+                host.transformationMethod = newMethod
+                virtualView.isChecked = newMethod != null
+                virtualView.invalidateDrawableState()
+                //TODO:
+                (host as? EditText)?.let { it.setSelection(it.text.length) }
             }
         }
 
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
-            virtualView.isChecked = isCheckedByDefault
+            virtualView.isCheckable = true
+            virtualView.isChecked = virtualView.host.hasPasswordVisible
+        }
+
+        override fun onDetach() {
+            virtualView.isCheckable = false
+            virtualView.isChecked = false
+            super.onDetach()
         }
 
         override fun getContentDescription(): String {

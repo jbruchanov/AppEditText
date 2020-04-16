@@ -1,37 +1,28 @@
 package com.scurab.android.appedittext.drawable
 
 import android.graphics.Rect
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.TextView
+import com.scurab.android.appedittext.AppEditText
+import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.sign
+import java.util.Locale
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class VirtualView(val id: Int, val host: TextView) {
     val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
     var drawable: WrappingDrawable? = null
-        set(value) {
-            initStates()
-            field = value
-        }
 
+    var isPressed: Boolean = false
     var isCheckable: Boolean = false
     var isChecked: Boolean = false
+    val isEnabled get() = host.isEnabled
+    val isInError get() = (host as? AppEditText)?.isInError ?: false
+    private val isFocused get() = host.isFocused
 
-    private val statesCount = 3
-
-    //has to be different array, otherwise ripple won't finish the animation
-    private lateinit var states: Array<IntArray>
-    private lateinit var statePromises: Array<Pair<Int, () -> Boolean>>
-
-    private fun initStates() {
-        states = arrayOf(IntArray(statesCount), IntArray(statesCount))
-        statePromises = arrayOf(
-            android.R.attr.state_enabled to { host.isEnabled },
-            android.R.attr.state_checked to { isCheckable && isChecked }
-        )
-    }
-
-    fun update(layout: LayoutStrategy) {
+    fun layout(layout: LayoutStrategy) {
         drawable
             ?.let { layout(it, host, rect) }
             ?: rect.set(0, 0, -1, -1)
@@ -43,21 +34,26 @@ class VirtualView(val id: Int, val host: TextView) {
         return rect.contains(x, y)
     }
 
-    private fun state(pressed: Boolean): IntArray {
-        val state = states[if (pressed) 1 else 0]
-        state[0] = if (pressed) android.R.attr.state_pressed else -android.R.attr.state_pressed
-        statePromises.forEachIndexed { index, (attr, isAttrStateActive) ->
-            state[index + 1] = attr * isAttrStateActive().sign()
+    private fun state() = stateReuseStaticArrays()
+
+    //seems to be only working solution for different cases
+    private fun stateReuseStaticArrays(): IntArray {
+        val index = isEnabled.bit(3) or isPressed.bit(2) or isChecked.bit(1) or isInError.bit(0)
+        val result = InternalStates.setIfNull(index) {
+            val result = IntArray(StatePromises.size)
+            StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
+                result[i] = attr * isAttrStateActive(this).sign()
+            }
+            result
         }
-        return state
+        return result
     }
 
     fun dispatchDownEvent(event: MotionEvent) {
         drawable?.let {
             it.isStateLocked = false
             setHotspot(event)
-            it.state = state(true)
-            it.invalidateSelf()
+            invalidateDrawableState()
         }
     }
 
@@ -71,20 +67,71 @@ class VirtualView(val id: Int, val host: TextView) {
 
     fun dispatchUpEvent(event: MotionEvent) {
         drawable?.let {
-            it.state = state(false)
-            it.invalidateSelf()
+            setHotspot(event)
+            invalidateDrawableState()
             it.isStateLocked = true
         }
     }
-    fun invalidateDrawableState() {
+
+    fun invalidateDrawableState(jumpToCurrentState : Boolean = false) {
         drawable?.let {
-            if (it.setState(state(false))) {
+            val state = state()
+            val set = it.setStateReal(state)
+            val name = host.resources.getResourceName(host.id)
+            Log.d("VirtualViewState", ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}"))
+            if (set) {
+                if (jumpToCurrentState) {
+                    it.jumpToCurrentState()
+                }
                 it.invalidateSelf()
             }
         }
     }
 
+    private fun dumpState(state: IntArray): String {
+        return state.map { v ->
+            when (abs(v)) {
+                android.R.attr.state_enabled -> "enabled"
+                android.R.attr.state_pressed -> "pressed"
+                android.R.attr.state_checkable -> "checkable"
+                android.R.attr.state_checked -> "checked"
+                R.attr.state_error -> "error"
+                else -> v.toString()
+            }.let { if (v < 0) it.toLowerCase(Locale.UK) else it.toUpperCase(Locale.UK) }
+        }.joinToString(", ")
+    }
+
     companion object {
         private val EmptyDrawable = WrappingDrawable(null)
+        //unclear why this is necessary to avoid reusing an array for single drawable
+        //when states are changed, but that's exactly what is happening in android StateSet
+        //and also view if necessary is creating completely new array everytime ¯\_(ツ)_/¯
+        //in our case, currently I need only 2 arrays based on error/pressed state.
+        //I'd guess that in drawable hierarchy the array maybe copied or reused
+        //hence it's safer to do same thing what google does.
+        //If this was broken, UI states weren't changing as expected
+
+        private val StatePromises = arrayOf < Pair<Int, (VirtualView) -> Boolean>>(
+            //isFocused is weird for Ripple, as it renders android.graphics.drawable.RippleBackground
+            //which is unexpected and doesn't seem to be way to turning it off
+            //android.R.attr.state_focused to { isFocused },
+            android.R.attr.state_enabled to { v -> v.isEnabled },
+            android.R.attr.state_pressed to { v -> v.isPressed },
+            android.R.attr.state_checkable to { v -> v.isCheckable },
+            android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },
+            R.attr.state_error to { v -> v.isInError }
+        )
+        private val InternalStates = arrayOfNulls<IntArray>(1 shl StatePromises.size)
     }
+}
+
+//common utils
+private fun Boolean.bit(shift: Int = 0): Int {
+    return (if(this) 1 else 0) shl shift
+}
+
+private inline fun <T : Any> Array<T?>.setIfNull(index: Int, block: () -> T): T {
+    val item = this[index] ?: block()
+    this[index] = item
+    return item
 }

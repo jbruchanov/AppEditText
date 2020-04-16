@@ -5,9 +5,11 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.SystemClock
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import com.scurab.android.appedittext.toShortString
 
 interface ICompoundDrawablesController {
     val host: View
@@ -16,6 +18,7 @@ interface ICompoundDrawablesController {
     fun dispatchTouchEvent(event: MotionEvent): Boolean
     fun onLayout()
     fun onAttachedToWindow()
+    fun drawableStateChanged()
 
     fun setCompoundDrawables(l: Drawable?, t: Drawable?, r: Drawable?, b: Drawable?)
     fun getCompoundDrawableClickStrategy(index: Int) : ICompoundDrawableBehaviour
@@ -71,7 +74,10 @@ open class CompoundDrawablesController(
 
     override fun onLayout() {
         DefaultAndroidCompoundDrawableLayout.values().forEach {
-            virtualViews[it.index].update(it)
+            virtualViews[it.index].apply {
+                layout(it)
+                invalidateDrawableState(true)
+            }
         }
     }
 
@@ -94,10 +100,12 @@ open class CompoundDrawablesController(
     }
 
     protected open fun dispatchTouchEventImpl(event: MotionEvent): Boolean {
+        Log.d("VirtualViewMouse", event.toShortString())
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 virtualViews.firstOrNull { it.contains(event) }
                     ?.let { view ->
+                        view.isPressed = true
                         view.drawable?.let {
                             view.dispatchDownEvent(event)
                             return true
@@ -114,12 +122,20 @@ open class CompoundDrawablesController(
             MotionEvent.ACTION_UP -> {
                 virtualViews.firstOrNull { it.contains(event) }
                     ?.let { view ->
+                        view.isPressed = false
                         view.drawable?.let {
                             view.dispatchUpEvent(event)
                             dispatchClick(view)
                             return true
                         }
                     }
+            }
+            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
+                virtualViews.forEach {
+                    it.isPressed = false
+                    it.invalidateDrawableState()
+                    it.drawable?.jumpToCurrentState()
+                }
             }
         }
         resetDrawables()
@@ -130,8 +146,12 @@ open class CompoundDrawablesController(
         drawableClickStrategies[view.id].onClick()
     }
 
-    private fun resetDrawables() {
-        if (isDirty) {
+    override fun drawableStateChanged() {
+        resetDrawables(true)
+    }
+
+    private fun resetDrawables(force:Boolean = false) {
+        if (isDirty || force) {
             virtualViews.forEach { view ->
                 view.drawable?.apply {
                     isStateLocked = false

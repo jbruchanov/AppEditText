@@ -101,6 +101,11 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         return state
     }
 
+    override fun drawableStateChanged() {
+        super.drawableStateChanged()
+        compoundDrawablesController?.drawableStateChanged()
+    }
+
     //region a11y
     override fun dispatchHoverEvent(event: MotionEvent): Boolean {
         return (compoundDrawablesAccessibilityDelegate.dispatchHoverEvent(event)
