@@ -6,12 +6,19 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="editTextStyle">@style/editTextStyle</item>
+        <item name="labelTextAppearance">@style/labelTextAppearance</item>
     </style>
 
     <style name="editTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">@color/input_field_text</item>
         <item name="android:minHeight">56dp</item>
-        <item name="android:background">@drawable/background_edittext</item>
+        <item name="android:background">@drawable/input_field_background</item>
         <item name="android:padding">5dp</item>
+        <item name="android:drawablePadding">4dp</item>
+    </style>
+
+    <style name="labelTextAppearance">
+        <item name="android:textColor">@color/input_field_text</item>
     </style>
 
 </resources>

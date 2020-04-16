@@ -5,4 +5,16 @@
              set when a view has input focus. -->
         <attr name="state_error" format="boolean" />
     </declare-styleable>
+
+    <attr name="labelTextAppearance"></attr>
+
+    <declare-styleable name="AppEditText">
+        <attr name="compoundDrawableLeftTitle" format="string" />
+        <attr name="compoundDrawableRightTitle" format="string" />
+        <attr name="compoundDrawableRightBehaviour" format="enum">
+            <enum name="none" value="0" />
+            <enum name="clear" value="1" />
+            <enum name="password" value="2" />
+        </attr>
+    </declare-styleable>
 </resources>

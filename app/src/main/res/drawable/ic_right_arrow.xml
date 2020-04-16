@@ -19,7 +19,7 @@
                         </shape>
                     </item>
                     <item
-                        android:drawable="@drawable/ic_baseline_eye_closed_24"
+                        android:drawable="@drawable/ic_baseline_arrow_right_24"
                         android:gravity="center" />
                 </layer-list>
             </item>
@@ -34,7 +34,7 @@
                         </shape>
                     </item>
                     <item
-                        android:drawable="@drawable/ic_baseline_eye_opened_24"
+                        android:drawable="@drawable/ic_baseline_arrow_right_24"
                         android:gravity="center" />
                 </layer-list>
             </item>

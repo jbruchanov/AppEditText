@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.StringRes
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.setCompoundDrawable
 
@@ -77,7 +78,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
     }
 
-    open class Button private constructor(
+    open class Button(
         @StringRes contentDescriptionResId: Int = 0,
         contentDescriptionString: String? = null,
         private val clickHandler: (Int, TextView) -> Unit

@@ -15,81 +15,191 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/simpleButton"
-            android:text="Simple button"/>
+            android:text="IF with left Label only + hint"/>
 
         <com.scurab.android.appedittext.AppEditText
-            android:id="@+id/simpleButton"
+            android:id="@+id/case1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:drawableLeft="@drawable/ic_baseline_adjust_24"
-            android:drawableRight="@drawable/ic_arrow_right"
-            android:drawableBottom="@drawable/ic_dropdown"
-            android:drawablePadding="4dp"
+            android:hint="This is a hint"
+            app:compoundDrawableLeftTitle="Label"
+            android:background="@drawable/input_field_background"  />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IF with right Clear button only"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:drawableRight="@drawable/ic_clear"
+            app:compoundDrawableRightBehaviour="clear"
             android:text="Hello World!" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/password"
-            android:text="Password "/>
+            android:text="IF with right password button only show/hide" />
 
         <com.scurab.android.appedittext.AppEditText
-            android:id="@+id/password"
+            android:id="@+id/case3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:drawablePadding="10dp"
-            tools:background="#"
-            android:drawableLeft="@mipmap/ic_launcher"
+            app:compoundDrawableRightBehaviour="password"
+            android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IF with right password button only drawable1/drawable2" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
             android:drawableRight="@drawable/ic_password"
+            app:compoundDrawableRightBehaviour="password"
             android:text="Hello World!" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/clear_text"
-            android:text="Clear Text"/>
+            android:text="IF with left Label + Clear button Clear" />
 
         <com.scurab.android.appedittext.AppEditText
-            android:id="@+id/clear_text"
+            android:id="@+id/case5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:inputType="text"
-            android:drawablePadding="10dp"
+            android:drawableRight="@drawable/ic_password"
+            app:compoundDrawableLeftTitle="Label"
+            app:compoundDrawableRightTitle="Clear"
+            app:compoundDrawableRightBehaviour="clear"
             android:text="Hello World!" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/simpleButton"
-            android:text="Text prefix"/>
+            android:text="IF with left Label + Clear button drawable" />
 
         <com.scurab.android.appedittext.AppEditText
-            android:id="@+id/prefix"
+            android:id="@+id/case6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:drawablePadding="4dp"
-            tools:background="#"
+            android:drawableRight="@drawable/ic_clear"
+            app:compoundDrawableRightBehaviour="clear"
+            app:compoundDrawableLeftTitle="Label"
             android:text="Hello World!" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/simpleButton"
-            android:text="Error when empty"/>
+            android:text="disabled IF with text + Clear button" />
 
         <com.scurab.android.appedittext.AppEditText
-            android:id="@+id/error"
+            android:id="@+id/case7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:drawablePadding="4dp"
-            tools:background="#"
+            android:enabled="false"
+            android:drawableRight="@drawable/ic_clear"
+            app:compoundDrawableRightBehaviour="clear"
             android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="disabled IF with no text with left Label + Clear button" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:enabled="false"
+            android:hint="This is a hint"
+            android:drawableRight="@drawable/ic_clear"
+            app:compoundDrawableLeftTitle="Label"
+            app:compoundDrawableRightTitle="Clear"
+            app:compoundDrawableRightBehaviour="clear"  />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IF with left Label + password button" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case9"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="This is a hint"
+            android:drawableRight="@drawable/ic_password"
+            app:compoundDrawableLeftTitle="Pwd:"
+            app:compoundDrawableRightBehaviour="password"  />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="disabled IF with left Label + password button" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="This is a hint"
+            android:enabled="false"
+            android:drawableRight="@drawable/ic_password"
+            app:compoundDrawableLeftTitle="Pwd:"
+            app:compoundDrawableRightBehaviour="password"
+            android:text="123"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IF with left Label + Clear button (drawable), error state let's say if text.length &lt; 5" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case11"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableRight="@drawable/ic_clear"
+            app:compoundDrawableRightBehaviour="clear"
+            android:text="123"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IF with Password button Show/Hide, error state let's say if contains only digits" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:drawableRight="@drawable/ic_password"
+            app:compoundDrawableRightBehaviour="password"
+            android:text="123"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="If with a button changing the cases of letters" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case13"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableRight="@drawable/ic_right_arrow"
+            android:text="aBcDeFgH1234"/>
 
     </LinearLayout>
 </ScrollView>

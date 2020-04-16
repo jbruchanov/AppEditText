@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:state_enabled="false" app:state_error="true">
+        <shape>
+            <solid android:color="@color/input_field_disabled_error_filling" />
+            <corners android:radius="@dimen/input_field_radius" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_error_focused" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="false">
+        <shape>
+            <corners android:radius="@dimen/input_field_radius" />
+            <solid android:color="@color/input_field_disabled_filling" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_disabled" />
+        </shape>
+    </item>
+
+    <item android:state_focused="true" app:state_error="true">
+        <shape>
+            <corners android:radius="@dimen/input_field_radius" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_error_focused" />
+        </shape>
+    </item>
+
+    <item android:state_focused="false" app:state_error="true">
+        <shape>
+            <corners android:radius="@dimen/input_field_radius" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_error_default" />
+        </shape>
+    </item>
+
+    <item android:state_focused="true">
+        <shape>
+            <corners android:radius="@dimen/input_field_radius" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_focused" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/input_field_radius" />
+            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_default" />
+        </shape>
+    </item>
+</selector>

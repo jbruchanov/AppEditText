@@ -84,7 +84,7 @@ open class CompoundDrawablesController(
     }
 
     final override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        val handled = dispatchTouchEventImpl(event)
+        val handled = if (host.isEnabled) dispatchTouchEventImpl(event) else false
         isDirty = handled || isDirty
         return handled
     }

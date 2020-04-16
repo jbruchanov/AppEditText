@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/simpleButton"
+            android:text="Simple button"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/simpleButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:drawableLeft="@drawable/ic_baseline_adjust_24"
+            android:drawableRight="@drawable/ic_arrow_right"
+            android:drawableBottom="@drawable/ic_dropdown"
+            android:drawablePadding="4dp"
+            android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/password"
+            android:text="Password "/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:drawablePadding="10dp"
+            tools:background="#"
+            android:drawableLeft="@mipmap/ic_launcher"
+            android:drawableRight="@drawable/ic_password"
+            android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/clear_text"
+            android:text="Clear Text"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/clear_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:inputType="text"
+            android:drawablePadding="10dp"
+            android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/simpleButton"
+            android:text="Text prefix"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/prefix"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:drawablePadding="4dp"
+            tools:background="#"
+            android:text="Hello World!" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/simpleButton"
+            android:text="Error when empty"/>
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:drawablePadding="4dp"
+            tools:background="#"
+            android:text="Hello World!" />
+
+    </LinearLayout>
+</ScrollView>
