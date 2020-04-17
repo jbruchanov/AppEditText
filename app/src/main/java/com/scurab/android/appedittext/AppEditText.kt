@@ -149,7 +149,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
                         }
                         R.styleable.AppEditText_compoundDrawableRightBehaviour -> {
                             when(typedArray.getInt(index, BEHAVIOUR_NONE)) {
-                                BEHAVIOUR_NONE -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.None)
+                                BEHAVIOUR_NONE -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.None())
                                 BEHAVIOUR_CLEAR_BUTTON -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.ClearButton())
                                 BEHAVIOUR_PASSWORD -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.PasswordButton())
                             }

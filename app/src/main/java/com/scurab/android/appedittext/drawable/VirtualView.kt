@@ -32,6 +32,8 @@ open class VirtualView(
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
+    /* extra flag to replicate focused state, due to RippleDrawable focus state, it's turned off by default */
+    var duplicateIsFocusedFromHost = true
     val isFocused get() = host.isFocused
 
     private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
@@ -47,7 +49,7 @@ open class VirtualView(
     //seems to be only working solution for different cases
     //same "idea" what is used in android via StateSet
     private fun stateReuseStaticArrays(): IntArray {
-        val index = isEnabled.bit(3) or isPressed.bit(2) or isChecked.bit(1) or isInError.bit(0)
+        val index = internalStatesIndex(isFocused, isEnabled, isPressed, isChecked, isCheckable, isInError)
         return InternalStates.setIfNull(index) {
             val result = IntArray(StatePromises.size)
             StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
@@ -55,6 +57,10 @@ open class VirtualView(
             }
             result
         }
+    }
+
+    private fun internalStatesIndex(vararg items: Boolean) : Int {
+        return items.foldIndexed(0) { i, acc, v -> acc xor v.bit(i) }
     }
 
     open fun onTouchEvent(event: MotionEvent): Boolean {
@@ -158,6 +164,7 @@ open class VirtualView(
     private fun dumpState(state: IntArray): String {
         return state.map { v ->
             when (abs(v)) {
+                android.R.attr.state_focused -> "focused"
                 android.R.attr.state_enabled -> "enabled"
                 android.R.attr.state_pressed -> "pressed"
                 android.R.attr.state_checkable -> "checkable"
@@ -176,11 +183,13 @@ open class VirtualView(
         //hence it's safer to do same thing what google does.
         //If this was broken, UI states weren't changing as expected
 
+        //TODO:  extract this into own place, so anyone could add new state more easily with hiding the complexity about these arrays
         private val StatePromises = arrayOf<Pair<Int, (VirtualView) -> Boolean>>(
             //isFocused is weird for Ripple, as it renders android.graphics.drawable.RippleBackground
             //which is unexpected and doesn't seem to be way to turning it off
             //android.R.attr.state_focused to { isFocused },
             android.R.attr.state_enabled to { v -> v.isEnabled },
+            android.R.attr.state_focused to { v -> v.duplicateIsFocusedFromHost && v.isFocused },
             android.R.attr.state_pressed to { v -> v.isPressed },
             android.R.attr.state_checkable to { v -> v.isCheckable },
             android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },

@@ -70,10 +70,20 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
     }
 
-    object None : CompoundDrawableBehaviour() {
+    class None : CompoundDrawableBehaviour() {
         override val isImportantForAccessibility: Boolean get() = false
         override fun onClick() {
             //do nothing
+        }
+
+        override fun onAttach(virtualView: VirtualView) {
+            super.onAttach(virtualView)
+            virtualView.duplicateIsFocusedFromHost = true
+        }
+
+        override fun onDetach() {
+            virtualView.duplicateIsFocusedFromHost = false
+            super.onDetach()
         }
     }
 

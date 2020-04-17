@@ -12,6 +12,8 @@ import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatTextView
 
+//refactor it in UI module
+//this is too naive and does work only in case of stateless, totally dumb drawable
 class TextDrawable(
     text: CharSequence,
     context: Context,

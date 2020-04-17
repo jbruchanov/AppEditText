@@ -23,7 +23,7 @@ interface ICompoundDrawablesController {
     //endregion
 
     fun setCompoundDrawables(l: Drawable?, t: Drawable?, r: Drawable?, b: Drawable?)
-    fun getCompoundDrawableClickStrategy(index: Int) : ICompoundDrawableBehaviour
+    fun getCompoundDrawableClickStrategy(index: Int): ICompoundDrawableBehaviour
     fun setCompoundDrawableClickStrategy(index: Int, behaviour: ICompoundDrawableBehaviour)
 }
 
@@ -40,7 +40,9 @@ open class CompoundDrawablesController(
     val bottomDrawable get() = bottom.drawable
 
     private val drawableClickStrategies =
-        Array<ICompoundDrawableBehaviour>(4) { CompoundDrawableBehaviour.None }
+        Array<ICompoundDrawableBehaviour>(4) { i ->
+            CompoundDrawableBehaviour.None().also { it.onAttach(virtualViews[i]) }
+        }
 
     /* Flag to optimize unnecessary setState calls */
     private var isDirty = false
@@ -54,7 +56,10 @@ open class CompoundDrawablesController(
         return drawableClickStrategies[index]
     }
 
-    override fun setCompoundDrawableClickStrategy(index: Int, behaviour: ICompoundDrawableBehaviour) {
+    override fun setCompoundDrawableClickStrategy(
+        index: Int,
+        behaviour: ICompoundDrawableBehaviour
+    ) {
         val virtualView = virtualViews[index]
         drawableClickStrategies[index].onDetach()
         drawableClickStrategies[index] = behaviour
@@ -116,7 +121,7 @@ open class CompoundDrawablesController(
         }
     }
 
-    private fun Drawable.wrapped() : WrappingDrawable = WrappingDrawable.wrapped(this)
+    private fun Drawable.wrapped(): WrappingDrawable = WrappingDrawable.wrapped(this)
 
     internal fun debugDraw(canvas: Canvas) {
         canvas.save()
