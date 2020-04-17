@@ -30,7 +30,8 @@ open class CompoundDrawablesController(
     private val viewDrawableSetter: (Drawable?, Drawable?, Drawable?, Drawable?) -> Unit
 ) : ICompoundDrawablesController {
 
-    override val virtualViews = Array(4) { VirtualView(it, host) }.toList()
+    private val touchListener = { id: Int, view: VirtualView -> dispatchClick(view) }
+    override val virtualViews = Array(4) { VirtualView(it, host, touchListener) }.toList()
     val leftDrawable get() = left.drawable
     val topDrawable get() = top.drawable
     val rightDrawable get() = right.drawable
@@ -39,7 +40,7 @@ open class CompoundDrawablesController(
     private val drawableClickStrategies =
         Array<ICompoundDrawableBehaviour>(4) { CompoundDrawableBehaviour.None }
 
-    /* Flag to optimize to mitigate unnecessary setState calls */
+    /* Flag to optimize unnecessary setState calls */
     private var isDirty = false
 
     private val left get() = virtualViews[0]
@@ -90,8 +91,15 @@ open class CompoundDrawablesController(
     }
 
     final override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        val handled = if (host.isEnabled) dispatchTouchEventImpl(event) else false
+        Log.d("VirtualViewMouse", event.toShortString())
+        if (!host.isEnabled) {
+            return false
+        }
+        val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
         isDirty = handled || isDirty
+        if (!handled) {
+            resetDrawables()
+        }
         return handled
     }
 
@@ -101,45 +109,11 @@ open class CompoundDrawablesController(
 
     protected open fun dispatchTouchEventImpl(event: MotionEvent): Boolean {
         Log.d("VirtualViewMouse", event.toShortString())
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                virtualViews.firstOrNull { it.contains(event) }
-                    ?.let { view ->
-                        view.isPressed = true
-                        view.drawable?.let {
-                            view.dispatchDownEvent(event)
-                            return true
-                        }
-                    }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                virtualViews.firstOrNull { it.contains(event) }
-                    ?.let {
-                        it.setHotspot(event)
-                        return true
-                    } /*?: resetDrawables()*/
-            }
-            MotionEvent.ACTION_UP -> {
-                virtualViews.firstOrNull { it.contains(event) }
-                    ?.let { view ->
-                        view.isPressed = false
-                        view.drawable?.let {
-                            view.dispatchUpEvent(event)
-                            dispatchClick(view)
-                            return true
-                        }
-                    }
-            }
-            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
-                virtualViews.forEach {
-                    it.isPressed = false
-                    it.invalidateDrawableState()
-                    it.drawable?.jumpToCurrentState()
-                }
-            }
+        val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
+        if (!handled) {
+            resetDrawables()
         }
-        resetDrawables()
-        return false
+        return handled
     }
 
     protected open fun dispatchClick(view: VirtualView) {

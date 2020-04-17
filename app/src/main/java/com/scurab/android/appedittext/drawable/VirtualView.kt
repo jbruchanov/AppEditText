@@ -3,6 +3,7 @@ package com.scurab.android.appedittext.drawable
 import android.graphics.Rect
 import android.util.Log
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.widget.TextView
 import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
@@ -11,21 +12,28 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class VirtualView(val id: Int, val host: TextView) {
+class VirtualView(val id: Int, val host: TextView, val touchListener: (Int, VirtualView) -> Unit) {
     val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
     var drawable: WrappingDrawable? = null
+        set(value) {
+            if (value == null) {
+                rect.setEmpty()
+            }
+            field = value
+        }
 
     var isPressed: Boolean = false
     var isCheckable: Boolean = false
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
+    private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
     private val isFocused get() = host.isFocused
 
     fun layout(layout: LayoutStrategy) {
         drawable
             ?.let { layout(it, host, rect) }
-            ?: rect.set(0, 0, -1, -1)
+            ?: rect.setEmpty()
     }
 
     fun contains(event: MotionEvent): Boolean {
@@ -49,14 +57,6 @@ class VirtualView(val id: Int, val host: TextView) {
         return result
     }
 
-    fun dispatchDownEvent(event: MotionEvent) {
-        drawable?.let {
-            it.isStateLocked = false
-            setHotspot(event)
-            invalidateDrawableState()
-        }
-    }
-
     fun setHotspot(event: MotionEvent) {
         drawable?.let {
             val x = event.x - rect.left
@@ -65,7 +65,15 @@ class VirtualView(val id: Int, val host: TextView) {
         }
     }
 
-    fun dispatchUpEvent(event: MotionEvent) {
+    protected open fun dispatchDownEvent(event: MotionEvent) {
+        drawable?.let {
+            it.isStateLocked = false
+            setHotspot(event)
+            invalidateDrawableState()
+        }
+    }
+
+    protected open fun dispatchUpEvent(event: MotionEvent) {
         drawable?.let {
             setHotspot(event)
             invalidateDrawableState()
@@ -73,12 +81,15 @@ class VirtualView(val id: Int, val host: TextView) {
         }
     }
 
-    fun invalidateDrawableState(jumpToCurrentState : Boolean = false) {
+    fun invalidateDrawableState(jumpToCurrentState: Boolean = false) {
         drawable?.let {
             val state = state()
             val set = it.setStateReal(state)
             val name = host.resources.getResourceName(host.id)
-            Log.d("VirtualViewState", ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}"))
+            Log.d(
+                "VirtualViewState",
+                ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}")
+            )
             if (set) {
                 if (jumpToCurrentState) {
                     it.jumpToCurrentState()
@@ -101,6 +112,38 @@ class VirtualView(val id: Int, val host: TextView) {
         }.joinToString(", ")
     }
 
+    open fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!rect.containsSlop(event.x, event.y, touchSlop)) {
+            return false
+        }
+
+        val x = event.x
+        val y = event.y
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                isPressed = true
+                dispatchDownEvent(event)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                drawable?.setHotspot(x, y)
+            }
+            MotionEvent.ACTION_UP -> {
+                isPressed = false
+                dispatchUpEvent(event)
+                drawable?.let {
+                    touchListener(0 /*CLICK, TODO*/, this)
+                }
+            }
+            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
+                isPressed = false
+                invalidateDrawableState()
+                drawable?.jumpToCurrentState()
+                return false
+            }
+        }
+        return true
+    }
+
     companion object {
         private val EmptyDrawable = WrappingDrawable(null)
         //unclear why this is necessary to avoid reusing an array for single drawable
@@ -111,7 +154,7 @@ class VirtualView(val id: Int, val host: TextView) {
         //hence it's safer to do same thing what google does.
         //If this was broken, UI states weren't changing as expected
 
-        private val StatePromises = arrayOf < Pair<Int, (VirtualView) -> Boolean>>(
+        private val StatePromises = arrayOf<Pair<Int, (VirtualView) -> Boolean>>(
             //isFocused is weird for Ripple, as it renders android.graphics.drawable.RippleBackground
             //which is unexpected and doesn't seem to be way to turning it off
             //android.R.attr.state_focused to { isFocused },
@@ -125,9 +168,18 @@ class VirtualView(val id: Int, val host: TextView) {
     }
 }
 
+private fun Rect.containsSlop(x: Float, y: Float, slop: Float): Boolean {
+    return left < right && top < bottom /*check for empty first*/ &&
+            x >= (left - slop) &&
+            x < (right + slop) &&
+            y >= (top - slop) &&
+            y < (bottom + slop)
+}
+
+
 //common utils
 private fun Boolean.bit(shift: Int = 0): Int {
-    return (if(this) 1 else 0) shl shift
+    return (if (this) 1 else 0) shl shift
 }
 
 private inline fun <T : Any> Array<T?>.setIfNull(index: Int, block: () -> T): T {

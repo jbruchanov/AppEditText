@@ -4,9 +4,11 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#009688</color>
 
+    <color name="input_field_hint_default">#AAA</color>
     <color name="input_field_disabled_filling">#DDD</color>
     <color name="input_field_disabled_error_filling">#FDD</color>
     <color name="input_field_disabled">#999</color>
+    <color name="input_field_error_hint">#80B00000</color>
     <color name="input_field_error_default">#B00000</color>
     <color name="input_field_error_focused">#F00</color>
     <color name="input_field_default">#999</color>
