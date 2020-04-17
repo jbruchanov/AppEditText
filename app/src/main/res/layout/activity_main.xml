@@ -15,30 +15,29 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="IF with left Label only + hint"/>
+            android:text="IF with left Label only + hint" />
 
         <com.scurab.android.appedittext.AppEditText
             android:id="@+id/case1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:hint="This is a hint"
-            app:compoundDrawableLeftTitle="Label"
-            android:background="@drawable/input_field_background"  />
+            android:inputType="text"
+            app:compoundDrawableLeftTitle="Label" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="IF with right Clear button only"/>
+            android:text="IF with right Clear button only" />
 
         <com.scurab.android.appedittext.AppEditText
             android:id="@+id/case2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:drawableRight="@drawable/ic_clear"
-            app:compoundDrawableRightBehaviour="clear"
-            android:text="Hello World!" />
+            android:inputType="text"
+            android:text="Hello World!"
+            app:compoundDrawableRightBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -50,8 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            app:compoundDrawableRightBehaviour="password"
-            android:text="Hello World!" />
+            android:text="Hello World!"
+            app:compoundDrawableRightBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -62,10 +61,10 @@
             android:id="@+id/case4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:drawableRight="@drawable/ic_password"
-            app:compoundDrawableRightBehaviour="password"
-            android:text="Hello World!" />
+            android:inputType="text"
+            android:text="Hello World!"
+            app:compoundDrawableRightBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -76,12 +75,12 @@
             android:id="@+id/case5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:drawableRight="@drawable/ic_password"
+            android:inputType="text"
+            android:text="Hello World!"
             app:compoundDrawableLeftTitle="Label"
-            app:compoundDrawableRightTitle="Clear"
             app:compoundDrawableRightBehaviour="clear"
-            android:text="Hello World!" />
+            app:compoundDrawableRightTitle="Clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -92,11 +91,11 @@
             android:id="@+id/case6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
             android:drawableRight="@drawable/ic_clear"
-            app:compoundDrawableRightBehaviour="clear"
+            android:inputType="text"
+            android:text="Hello World!"
             app:compoundDrawableLeftTitle="Label"
-            android:text="Hello World!" />
+            app:compoundDrawableRightBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -107,11 +106,11 @@
             android:id="@+id/case7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:enabled="false"
             android:drawableRight="@drawable/ic_clear"
-            app:compoundDrawableRightBehaviour="clear"
-            android:text="Hello World!" />
+            android:enabled="false"
+            android:inputType="text"
+            android:text="Hello World!"
+            app:compoundDrawableRightBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -122,13 +121,13 @@
             android:id="@+id/case8"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
+            android:drawableRight="@drawable/ic_clear"
             android:enabled="false"
             android:hint="This is a hint"
-            android:drawableRight="@drawable/ic_clear"
+            android:inputType="text"
             app:compoundDrawableLeftTitle="Label"
-            app:compoundDrawableRightTitle="Clear"
-            app:compoundDrawableRightBehaviour="clear"  />
+            app:compoundDrawableRightBehaviour="clear"
+            app:compoundDrawableRightTitle="Clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -139,11 +138,11 @@
             android:id="@+id/case9"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="This is a hint"
             android:drawableRight="@drawable/ic_password"
+            android:hint="This is a hint"
+            android:inputType="textPassword"
             app:compoundDrawableLeftTitle="Pwd:"
-            app:compoundDrawableRightBehaviour="password"  />
+            app:compoundDrawableRightBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -154,13 +153,13 @@
             android:id="@+id/case10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="This is a hint"
-            android:enabled="false"
             android:drawableRight="@drawable/ic_password"
+            android:enabled="false"
+            android:hint="This is a hint"
+            android:inputType="textPassword"
+            android:text="123"
             app:compoundDrawableLeftTitle="Pwd:"
-            app:compoundDrawableRightBehaviour="password"
-            android:text="123"/>
+            app:compoundDrawableRightBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -172,8 +171,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableRight="@drawable/ic_clear"
-            app:compoundDrawableRightBehaviour="clear"
-            android:text="123"/>
+            android:text="123"
+            app:compoundDrawableRightBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -184,10 +183,10 @@
             android:id="@+id/case12"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
             android:drawableRight="@drawable/ic_password"
-            app:compoundDrawableRightBehaviour="password"
-            android:text="123"/>
+            android:inputType="textPassword"
+            android:text="123"
+            app:compoundDrawableRightBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -199,7 +198,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableRight="@drawable/ic_right_arrow"
-            android:text="aBcDeFgH1234"/>
+            android:text="aBcDeFgH1234" />
 
     </LinearLayout>
 </ScrollView>
