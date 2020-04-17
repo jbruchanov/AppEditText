@@ -44,7 +44,6 @@ import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 public class WrappingDrawable extends Drawable implements Drawable.Callback {
 
     private Drawable mDrawable;
-    private boolean mLockedState = true;
 
     public WrappingDrawable(Drawable drawable) {
         setWrappedDrawable(drawable);
@@ -240,15 +239,6 @@ public class WrappingDrawable extends Drawable implements Drawable.Callback {
             drawable.setCallback(this);
         }
     }
-
-    public boolean isStateLocked() {
-        return mLockedState;
-    }
-
-    public void setStateLocked(boolean mLockedState) {
-        this.mLockedState = mLockedState;
-    }
-
 
     public static WrappingDrawable wrapped(Drawable drawable) {
         if (drawable instanceof WrappingDrawable) {

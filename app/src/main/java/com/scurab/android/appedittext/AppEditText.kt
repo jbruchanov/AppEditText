@@ -2,6 +2,7 @@ package com.scurab.android.appedittext
 
 import TextDrawable
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
@@ -91,7 +92,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        val onTouchEvent = compoundDrawablesController.dispatchTouchEvent(event) ?: false
+        val onTouchEvent = compoundDrawablesController.dispatchTouchEvent(event)
         return onTouchEvent || super.dispatchTouchEvent(event)
     }
 
@@ -103,7 +104,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun drawableStateChanged() {
         super.drawableStateChanged()
-        compoundDrawablesController?.drawableStateChanged()
+        compoundDrawablesController.drawableStateChanged()
     }
 
     //region a11y
@@ -125,7 +126,14 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
             previouslyFocusedRect
         )
     }
-    //endregion a11y
+
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        if (false/*debug*/) {
+            compoundDrawablesController.debugDraw(canvas)
+        }
+    }
 
     private val pendingDrawable : Array<Drawable?> = arrayOfNulls<Drawable?>(4)
     init {

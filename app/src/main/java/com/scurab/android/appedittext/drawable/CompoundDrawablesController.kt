@@ -15,10 +15,12 @@ interface ICompoundDrawablesController {
     val host: View
     val virtualViews: List<VirtualView>
 
+    //endregion to call from view
     fun dispatchTouchEvent(event: MotionEvent): Boolean
     fun onLayout()
     fun onAttachedToWindow()
     fun drawableStateChanged()
+    //endregion
 
     fun setCompoundDrawables(l: Drawable?, t: Drawable?, r: Drawable?, b: Drawable?)
     fun getCompoundDrawableClickStrategy(index: Int) : ICompoundDrawableBehaviour
@@ -77,7 +79,7 @@ open class CompoundDrawablesController(
         DefaultAndroidCompoundDrawableLayout.values().forEach {
             virtualViews[it.index].apply {
                 layout(it)
-                invalidateDrawableState(true)
+                invalidateDrawableState()
             }
         }
     }
@@ -97,9 +99,6 @@ open class CompoundDrawablesController(
         }
         val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
         isDirty = handled || isDirty
-        if (!handled) {
-            resetDrawables()
-        }
         return handled
     }
 
@@ -107,33 +106,13 @@ open class CompoundDrawablesController(
         setCompoundDrawables(host.compoundDrawables)
     }
 
-    protected open fun dispatchTouchEventImpl(event: MotionEvent): Boolean {
-        Log.d("VirtualViewMouse", event.toShortString())
-        val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
-        if (!handled) {
-            resetDrawables()
-        }
-        return handled
-    }
-
     protected open fun dispatchClick(view: VirtualView) {
         drawableClickStrategies[view.id].onClick()
     }
 
     override fun drawableStateChanged() {
-        resetDrawables(true)
-    }
-
-    private fun resetDrawables(force:Boolean = false) {
-        if (isDirty || force) {
-            virtualViews.forEach { view ->
-                view.drawable?.apply {
-                    isStateLocked = false
-                    view.invalidateDrawableState()
-                    isStateLocked = true
-                }
-            }
-            isDirty = false
+        virtualViews.forEach { view ->
+            view.invalidateDrawableState()
         }
     }
 

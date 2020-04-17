@@ -3,6 +3,7 @@ package com.scurab.android.appedittext.drawable
 import android.graphics.Rect
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewConfiguration
 import android.widget.TextView
 import com.scurab.android.appedittext.AppEditText
@@ -10,9 +11,13 @@ import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.sign
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
-class VirtualView(val id: Int, val host: TextView, val touchListener: (Int, VirtualView) -> Unit) {
+open class VirtualView(
+    val id: Int,
+    val host: TextView,
+    val touchListener: (Int, VirtualView) -> Unit
+) {
+
     val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
     var drawable: WrappingDrawable? = null
         set(value) {
@@ -27,8 +32,9 @@ class VirtualView(val id: Int, val host: TextView, val touchListener: (Int, Virt
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
+    val isFocused get() = host.isFocused
+
     private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
-    private val isFocused get() = host.isFocused
 
     fun layout(layout: LayoutStrategy) {
         drawable
@@ -36,66 +42,116 @@ class VirtualView(val id: Int, val host: TextView, val touchListener: (Int, Virt
             ?: rect.setEmpty()
     }
 
-    fun contains(event: MotionEvent): Boolean {
-        val x = event.x.roundToInt()
-        val y = event.y.roundToInt()
-        return rect.contains(x, y)
-    }
-
     private fun state() = stateReuseStaticArrays()
 
     //seems to be only working solution for different cases
+    //same "idea" what is used in android via StateSet
     private fun stateReuseStaticArrays(): IntArray {
         val index = isEnabled.bit(3) or isPressed.bit(2) or isChecked.bit(1) or isInError.bit(0)
-        val result = InternalStates.setIfNull(index) {
+        return InternalStates.setIfNull(index) {
             val result = IntArray(StatePromises.size)
             StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
                 result[i] = attr * isAttrStateActive(this).sign()
             }
             result
         }
-        return result
     }
 
-    fun setHotspot(event: MotionEvent) {
-        drawable?.let {
-            val x = event.x - rect.left
-            val y = event.y - rect.top
-            it.setHotspot(x, y)
+    open fun onTouchEvent(event: MotionEvent): Boolean {
+        if (rect.isEmpty) return false
+
+        val contains = rect.containsSlop(event.x, event.y, touchSlop)
+        val x = event.x
+        val y = event.y
+        var handled = false
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                //if we touch down and not for our drawable, just ignore it
+                if (contains) {
+                    dispatchDownEvent(event)
+                    handled = true
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                //handle move action only if we were initially pressed
+                //handles weird cases when you touchdown on left and move touching to right
+                if (isPressed) {
+                    handled = true
+                    drawable?.setHotspot(x, y)
+                    if (!contains) {
+                        //if we started on view, but leaving it
+                        //just act like we did touchUp to reset, with no click callbacks
+                        dispatchUpEvent(event, contains)
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                //just reset drawable state
+                dispatchUpEvent(event, contains)
+                //notify we clicked on, if the location was related to our view
+                handled = contains
+            }
+            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
+                dispatchUpEvent(event, false)
+                //explicit invalidation is necessary for correct ripple finish
+                //looks like in scrollview when DOWN -> few MOVEs -> CANCEL
+                //ripple doesn't invalidate itself if pressed state changed only in our stateSet
+                //so finish ripple nicely like we "left" the view
+                host.postInvalidate()
+            }
         }
+        return handled
     }
 
     protected open fun dispatchDownEvent(event: MotionEvent) {
+        isPressed = true
         drawable?.let {
-            it.isStateLocked = false
             setHotspot(event)
             invalidateDrawableState()
         }
     }
 
-    protected open fun dispatchUpEvent(event: MotionEvent) {
+    protected open fun dispatchUpEvent(event: MotionEvent, ownLocation: Boolean) {
+        isPressed = false
         drawable?.let {
             setHotspot(event)
             invalidateDrawableState()
-            it.isStateLocked = true
+            drawable?.let {
+                //call only if containedByView is default behaviour
+                //however as the drawable is tiny, calling callback if the drawables is pressed
+                //but finger outside (to see you've pressed that) does seem to be useful as well
+                if (ownLocation) {
+                    touchListener(0 /*CLICK, TODO*/, this)
+                }
+            }
         }
     }
 
-    fun invalidateDrawableState(jumpToCurrentState: Boolean = false) {
-        drawable?.let {
+
+    fun invalidateDrawableState() {
+        drawable?.let { it ->
             val state = state()
             val set = it.setStateReal(state)
-            val name = host.resources.getResourceName(host.id)
+            val name = host.id
+                .takeIf { it != View.NO_ID }
+                ?.let { host.resources.getResourceName(it) }
+                ?: ""
+
             Log.d(
                 "VirtualViewState",
                 ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}")
             )
             if (set) {
-                if (jumpToCurrentState) {
-                    it.jumpToCurrentState()
-                }
                 it.invalidateSelf()
             }
+        }
+    }
+
+    private fun setHotspot(event: MotionEvent) {
+        drawable?.let {
+            val x = event.x - rect.left
+            val y = event.y - rect.top
+            it.setHotspot(x, y)
         }
     }
 
@@ -112,44 +168,10 @@ class VirtualView(val id: Int, val host: TextView, val touchListener: (Int, Virt
         }.joinToString(", ")
     }
 
-    open fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!rect.containsSlop(event.x, event.y, touchSlop)) {
-            return false
-        }
-
-        val x = event.x
-        val y = event.y
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                isPressed = true
-                dispatchDownEvent(event)
-            }
-            MotionEvent.ACTION_MOVE -> {
-                drawable?.setHotspot(x, y)
-            }
-            MotionEvent.ACTION_UP -> {
-                isPressed = false
-                dispatchUpEvent(event)
-                drawable?.let {
-                    touchListener(0 /*CLICK, TODO*/, this)
-                }
-            }
-            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
-                isPressed = false
-                invalidateDrawableState()
-                drawable?.jumpToCurrentState()
-                return false
-            }
-        }
-        return true
-    }
-
     companion object {
-        private val EmptyDrawable = WrappingDrawable(null)
         //unclear why this is necessary to avoid reusing an array for single drawable
         //when states are changed, but that's exactly what is happening in android StateSet
         //and also view if necessary is creating completely new array everytime ¯\_(ツ)_/¯
-        //in our case, currently I need only 2 arrays based on error/pressed state.
         //I'd guess that in drawable hierarchy the array maybe copied or reused
         //hence it's safer to do same thing what google does.
         //If this was broken, UI states weren't changing as expected
