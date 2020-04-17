@@ -1,6 +1,5 @@
 package com.scurab.android.appedittext
 
-import TextDrawable
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -104,7 +103,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun drawableStateChanged() {
         super.drawableStateChanged()
-        compoundDrawablesController.drawableStateChanged()
+        compoundDrawablesController?./*ctor call*/drawableStateChanged()
     }
 
     //region a11y

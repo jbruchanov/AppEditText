@@ -1,6 +1,5 @@
 package com.scurab.android.appedittext
 
-import TextDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.text.Editable
