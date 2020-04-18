@@ -1,6 +1,7 @@
 package com.scurab.android.appedittext.drawable
 
 import android.graphics.Rect
+import android.graphics.drawable.RippleDrawable
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -32,8 +33,6 @@ open class VirtualView(
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
-    /* extra flag to replicate focused state, due to RippleDrawable focus state, it's turned off by default */
-    var duplicateIsFocusedFromHost = true
     val isFocused get() = host.isFocused
 
     private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
@@ -185,11 +184,9 @@ open class VirtualView(
 
         //TODO:  extract this into own place, so anyone could add new state more easily with hiding the complexity about these arrays
         private val StatePromises = arrayOf<Pair<Int, (VirtualView) -> Boolean>>(
-            //isFocused is weird for Ripple, as it renders android.graphics.drawable.RippleBackground
-            //which is unexpected and doesn't seem to be way to turning it off
-            //android.R.attr.state_focused to { isFocused },
             android.R.attr.state_enabled to { v -> v.isEnabled },
-            android.R.attr.state_focused to { v -> v.duplicateIsFocusedFromHost && v.isFocused },
+            //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird
+            android.R.attr.state_focused to { v -> v.drawable?.wrappedDrawable !is RippleDrawable && v.isFocused },
             android.R.attr.state_pressed to { v -> v.isPressed },
             android.R.attr.state_checkable to { v -> v.isCheckable },
             android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },

@@ -75,16 +75,6 @@ abstract class CompoundDrawableBehaviour private constructor(
         override fun onClick() {
             //do nothing
         }
-
-        override fun onAttach(virtualView: VirtualView) {
-            super.onAttach(virtualView)
-            virtualView.duplicateIsFocusedFromHost = true
-        }
-
-        override fun onDetach() {
-            virtualView.duplicateIsFocusedFromHost = false
-            super.onDetach()
-        }
     }
 
     open class Button(
