@@ -8,38 +8,18 @@
         </shape>
     </item>
     <item>
-        <selector>
-            <item app:state_error="true">
-                <layer-list>
-                    <!-- just better asset -->
-                    <item
-                        android:width="@dimen/drawable_icon_size"
-                        android:height="@dimen/drawable_icon_size">
-                        <shape>
-                            <solid android:color="@color/transparent" />
-                        </shape>
-                    </item>
-                    <item
-                        android:drawable="@drawable/ic_baseline_close_red_24"
-                        android:gravity="center" />
-                </layer-list>
+        <layer-list>
+            <!-- just better asset -->
+            <item
+                android:width="@dimen/drawable_icon_size"
+                android:height="@dimen/drawable_icon_size">
+                <shape>
+                    <solid android:color="@color/transparent" />
+                </shape>
             </item>
-            <item>
-                <layer-list>
-                    <!-- just better asset -->
-                    <item
-                        android:width="@dimen/drawable_icon_size"
-                        android:height="@dimen/drawable_icon_size">
-                        <shape>
-                            <solid android:color="@color/transparent" />
-                        </shape>
-                    </item>
-                    <item
-                        android:drawable="@drawable/ic_baseline_close_24"
-                        android:gravity="center" />
-                </layer-list>
-            </item>
-        </selector>
+            <item
+                android:drawable="@drawable/ic_baseline_close_24"
+                android:gravity="center" />
+        </layer-list>
     </item>
-
 </ripple>
