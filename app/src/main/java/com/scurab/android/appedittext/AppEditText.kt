@@ -178,7 +178,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (true/*debug*/) {
+        if (false/*debug*/) {
             compoundDrawablesController.debugDraw(canvas)
         }
     }
