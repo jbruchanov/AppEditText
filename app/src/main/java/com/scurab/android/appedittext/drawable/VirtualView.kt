@@ -49,9 +49,9 @@ open class VirtualView(
     private fun state() = stateReuseStaticArrays()
 
     //seems to be only working solution for different cases
-    //same "idea" what is used in android via StateSet
+    //same "idea" what is used in android's StateSet
     private fun stateReuseStaticArrays(): IntArray {
-        val index = internalStatesIndex(isFocused, isEnabled, isPressed, isChecked, isCheckable, isInError)
+        val index = booleansToBitMask(isFocused, isEnabled, isPressed, isChecked, isCheckable, isInError)
         return InternalStates.setIfNull(index) {
             val result = IntArray(StatePromises.size)
             StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
@@ -59,10 +59,6 @@ open class VirtualView(
             }
             result
         }
-    }
-
-    private fun internalStatesIndex(vararg items: Boolean) : Int {
-        return items.foldIndexed(0) { i, acc, v -> acc xor v.bit(i) }
     }
 
     open fun onTouchEvent(event: MotionEvent): Boolean {
@@ -207,8 +203,13 @@ private fun Rect.containsSlop(x: Float, y: Float, slop: Float): Boolean {
 
 
 //common utils
-private fun Boolean.bit(shift: Int = 0): Int {
+fun Boolean.bit(shift: Int = 0): Int {
     return (if (this) 1 else 0) shl shift
+}
+
+fun booleansToBitMask(vararg items: Boolean) : Int {
+    require(items.size <= 32) { "Maximum size for Int bitmask 32, passed args:${items.size}" }
+    return items.foldIndexed(0) { i, acc, v -> acc xor v.bit(i) }
 }
 
 private inline fun <T : Any> Array<T?>.setIfNull(index: Int, block: () -> T): T {

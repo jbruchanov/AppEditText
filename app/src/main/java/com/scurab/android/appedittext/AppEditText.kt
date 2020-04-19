@@ -4,12 +4,23 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.widget.TextView
+import androidx.annotation.Keep
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
-import com.scurab.android.appedittext.drawable.*
+import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
+import com.scurab.android.appedittext.drawable.CompoundDrawablesAccessibilityDelegate
+import com.scurab.android.appedittext.drawable.CompoundDrawablesController
+import com.scurab.android.appedittext.drawable.ICompoundDrawableBehaviour
+import com.scurab.android.appedittext.drawable.SuperTextDrawable
+import com.scurab.android.appedittext.drawable.bit
 
 open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
     AppCompatEditText(context, attrs, defStyleAttr) {
@@ -20,7 +31,16 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         attrs,
         R.attr.editTextStyle
     )
+    /*
+        pending drawables set via xml, we have to wait until rtl it's resolved,
+        otherwise left/right compound drawables are not set and might be lost
+     */
+    private val pendingDrawable: Array<Drawable?> = arrayOfNulls<Drawable?>(4)
 
+    /**
+     * Error state for the view.
+     * To reflect the state in drawables use ```app:state_error="true"``` on particular drawable in StateListDrawable
+     */
     var isInError: Boolean = false
         set(value) {
             if (value != field) {
@@ -46,6 +66,11 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
             ViewCompat.setAccessibilityDelegate(this, it)
         }
 
+    /**
+     * Set a behaviour for the drawables.
+     * As Behaviours might stateful they are not persisted during [onSaveInstanceState].
+     * It's developer's responsibility to handle it manually.
+     */
     fun setCompoundDrawableBehaviour(index: Int, behaviour: ICompoundDrawableBehaviour) {
         compoundDrawablesController.setCompoundDrawableClickStrategy(index, behaviour)
     }
@@ -131,23 +156,45 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         }
     }
 
-    private val pendingDrawable : Array<Drawable?> = arrayOfNulls<Drawable?>(4)
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        return SavedState(superState).apply {
+            this.isInError = this@AppEditText.isInError
+        }
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        val superState = (state as? SavedState)?.let {
+            this@AppEditText.isInError = it.isInError
+            it.superState
+        } ?: state
+        super.onRestoreInstanceState(superState)
+    }
+
     init {
         attrs?.let { attrs ->
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.AppEditText)
             (0 until typedArray.indexCount)
                 .forEach {
-                    when(val index = typedArray.getIndex(it)) {
+                    when (val index = typedArray.getIndex(it)) {
                         R.styleable.AppEditText_compoundDrawableLeftTitle -> {
                             //TODO: default styling
-                            pendingDrawable[0] = SuperTextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
+                            pendingDrawable[0] = SuperTextDrawable(
+                                typedArray.getText(index),
+                                context,
+                                R.style.labelTextAppearance
+                            )
                         }
                         R.styleable.AppEditText_compoundDrawableRightTitle -> {
                             //TODO: default styling
-                            pendingDrawable[2] = SuperTextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
+                            pendingDrawable[2] = SuperTextDrawable(
+                                typedArray.getText(index),
+                                context,
+                                R.style.labelTextAppearance
+                            )
                         }
                         R.styleable.AppEditText_compoundDrawableRightBehaviour -> {
-                            when(typedArray.getInt(index, BEHAVIOUR_NONE)) {
+                            when (typedArray.getInt(index, BEHAVIOUR_NONE)) {
                                 BEHAVIOUR_NONE -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.None())
                                 BEHAVIOUR_CLEAR_BUTTON -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.ClearButton())
                                 BEHAVIOUR_PASSWORD -> setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.PasswordButton())
@@ -164,5 +211,48 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         private const val BEHAVIOUR_NONE = 0
         private const val BEHAVIOUR_CLEAR_BUTTON = 1
         private const val BEHAVIOUR_PASSWORD = 2
+
+
+        @Keep @Suppress("unused")
+        @JvmStatic
+        val CREATOR: Parcelable.ClassLoaderCreator<SavedState> =
+            object : Parcelable.ClassLoaderCreator<SavedState> {
+                @RequiresApi(Build.VERSION_CODES.N)
+                override fun createFromParcel(source: Parcel, loader: ClassLoader): SavedState {
+                    return SavedState(source, loader)
+                }
+
+                override fun createFromParcel(source: Parcel): SavedState {
+                    return SavedState(source)
+                }
+
+                override fun newArray(size: Int): Array<SavedState?> {
+                    return arrayOfNulls(size)
+                }
+            }
+    }
+
+    class SavedState : BaseSavedState {
+        var isInError = false
+
+        constructor(source: Parcel) : super(source) {
+            init(source)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        constructor(source: Parcel, loader: ClassLoader?) : super(source, loader) {
+            init(source)
+        }
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        private fun init(source: Parcel?) {
+            isInError = (source?.readInt() ?: 0) == 1
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeInt(isInError.bit())
+        }
     }
 }
