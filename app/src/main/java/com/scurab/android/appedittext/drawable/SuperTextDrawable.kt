@@ -1,6 +1,5 @@
 package com.scurab.android.appedittext.drawable
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.content.res.Resources.Theme
@@ -19,32 +18,79 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
+import androidx.annotation.Px
 import androidx.annotation.StyleRes
+import androidx.annotation.StyleableRes
+import androidx.core.content.res.getDimensionOrThrow
 import androidx.core.content.res.getIntOrThrow
+import androidx.core.content.res.getResourceIdOrThrow
 import androidx.core.graphics.drawable.DrawableCompat
 import com.scurab.android.appedittext.R
 import org.xmlpull.v1.XmlPullParser
+import kotlin.math.roundToInt
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 open class SuperTextDrawable : Drawable() {
     private var _alpha: Int = 255
     private val TAG = "SuperTextDrawable"
 
+    /**
+     * Text layout.
+     * Set this value for any complex text.
+     */
     var textLayout: Layout? by invalidating(null) { updateBoundsWithIntrinsicSize() }
+    /**
+     * Gravity of the text, useful in case of multiple layers with different size.
+     * Use StateListDrawable#attr_android:constantSize = true to respect that.
+     * For single drawable itself has no meaning.
+     */
     var gravity: Int by invalidating(Gravity.CENTER)
+
+    /**
+     * Stateful text color
+     */
     var color: ColorStateList by invalidating(ColorStateList.valueOf(Color.BLACK))
+
+    /**
+     * CharSequence for easier setup of [textLayout]
+     */
     var text: CharSequence? by invalidating(null) { buildLayout() }
+
+    /**
+     * Text Alignment in case of multiple lines only.
+     * Currently has only naive implementation of textWidth, which doesn't respect the new lines.
+     * Calculating text width based on CharSequence with spans might be very tricky, so
+     * use only 1 line texts.
+     */
+    var textAlignment by invalidating(Layout.Alignment.ALIGN_CENTER) {
+        buildLayout()
+    }
+
+    /**
+     * Text size in Pix
+     */
     var textSize: Float
-        get() = paint.textSize
-        set(value) {
+        @Px get() = paint.textSize
+        set(@Px value) {
             paint.textSize = value
+            updateBoundsWithIntrinsicSize()
             invalidateSelf()
         }
+
+    /**
+     * Text padding in pixels
+     * Array must have 4 elements following order [left, top, right, bottom]
+     * It doesn't respect the Start/End
+     */
     var padding: IntArray by invalidating(IntArray(4)) { array ->
         require(array.size == 4) { "Invalid array size, must be 4, newValue is ${array.size}" }
     }
+
+    /**
+     * Horizontal text padding
+     */
     var paddingHorizontal: Int
         get() = padding[0] + padding[2]
         set(value) {
@@ -53,6 +99,9 @@ open class SuperTextDrawable : Drawable() {
             invalidateSelf()
         }
 
+    /**
+     * Vertical text padding
+     */
     var paddingVertical: Int
         get() = padding[1] + padding[3]
         set(value) {
@@ -61,114 +110,133 @@ open class SuperTextDrawable : Drawable() {
             invalidateSelf()
         }
 
-    private val paint = TextPaint().apply {
+    protected val paint = TextPaint().apply {
         isAntiAlias = true
         textSize = Resources.getSystem().displayMetrics.scaledDensity * 12
         color = Color.BLACK
     }
+
     private val tempRect = Rect()
 
     override fun inflate(
-        r: Resources,
-        parser: XmlPullParser,
-        attrs: AttributeSet,
-        theme: Resources.Theme?
+            res: Resources,
+            parser: XmlPullParser,
+            attrs: AttributeSet,
+            theme: Resources.Theme?
     ) {
-        super.inflate(r, parser, attrs, theme)
-        val arr = obtainAttributes(r, theme, attrs, R.styleable.SuperTextDrawable)
-        (0 until arr.indexCount).forEach {
-            when (val index = arr.getIndex(it)) {
-                R.styleable.SuperTextDrawable_android_text -> text = arr.getText(index)
-                R.styleable.SuperTextDrawable_android_textSize -> paint.textSize = arr.getDimension(index, 0f)
-                R.styleable.SuperTextDrawable_android_textColor -> color = arr.getColorStateList(index)!!
-                R.styleable.SuperTextDrawable_android_gravity -> gravity = arr.getIntOrThrow(index)
-                R.styleable.SuperTextDrawable_android_padding -> {
-                    val p = arr.getDimensionPixelSize(index, 0)
-                    padding.forEachIndexed { index, _ ->
-                        padding[index] = p
-                    }
-                }
-                R.styleable.SuperTextDrawable_android_paddingHorizontal -> {
-                    paddingHorizontal = arr.getDimensionPixelSize(index, 0)
-                }
-                R.styleable.SuperTextDrawable_android_paddingVertical -> {
-                    paddingVertical = arr.getDimensionPixelSize(index, 0)
-                }
-            }
-        }
+        super.inflate(res, parser, attrs, theme)
+        val arr = obtainAttributes(res, theme, attrs, R.styleable.SuperTextDrawable)
+        initValueFromAttrs(arr, res, theme ?: res.newTheme(), TEXT_DRAWABLE)
         arr.recycle()
     }
 
     private fun buildLayout() {
         textLayout = text?.let {
-            val measureText = paint.measureText(it, 0, it.length)
+            //doesn't respect new lines.
+            //far more complicated as it's CharSequence (having spans)
+            //how to measure it properly for all cases
+            //TODO: maybe naive implementation for strings only ?
             StaticLayout(
-                it,
-                paint,
-                measureText.ceil(),
-                Layout.Alignment.ALIGN_CENTER,
-                1f,
-                0f,
-                true
+                    it,
+                    paint,
+                    paint.measureText(it, 0, it.length).ceilInt(),
+                    Layout.Alignment.ALIGN_CENTER,
+                    1f/*extra line spacing * coef */,
+                    0f/*extra line spacing + coef */,
+                    false/*include font padding?*/
             )
         }
     }
 
-    fun setTextAppearance(context: Context, @StyleRes id: Int) {
-        val typedArray = context.obtainStyledAttributes(id, R.styleable.TextAppearanceSubset)
-        var fontStyle = Typeface.NORMAL
-        var fontFamily: String? = null
-        (0 until typedArray.indexCount).forEach { i ->
-            when (typedArray.getIndex(i)) {
-                R.styleable.TextAppearanceSubset_android_textColor -> {
-                    color = typedArray.getColorStateList(i) ?: TODO("null textColor ?")
-                }
-                R.styleable.TextAppearanceSubset_android_textSize -> {
-                    paint.textSize = typedArray.getDimension(i, 0f)
-                }
-                R.styleable.TextAppearanceSubset_android_font -> {
-                    paint.setTypeface(typedArray.getFont(i))
-                }
-                R.styleable.TextAppearanceSubset_android_fontFamily -> {
-                    fontFamily = typedArray.getString(i)
-                }
-                R.styleable.TextAppearanceSubset_android_textStyle -> {
-                    fontStyle = typedArray.getInt(i, Typeface.NORMAL)
-                }
-                //TODO:more stuff
-            }
-        }
-
-        fontFamily?.let {
-            paint.typeface = Typeface.create(it, fontStyle)
-        }
-        typedArray.recycle()
-        buildLayout()
+    /**
+     * Update typeface of the textDrawable
+     */
+    open fun setTypeFace(typeface: Typeface) {
+        paint.typeface = typeface
+        invalidateSelf()
     }
 
+    /**
+     * Set textAppearance of the TextDrawable.
+     * Follow [R.attr.CustomTextAppearance] for supported fields
+     */
+    fun setTextAppearance(@StyleRes resId: Int, res: Resources, theme: Theme) {
+        val array: TypedArray = theme.obtainStyledAttributes(resId, R.styleable.CustomTextAppearance)
+        initValueFromAttrs(array, res, theme, TEXT_APPEARANCE)
+        array.recycle()
+    }
+
+    private fun initValueFromAttrs(array: TypedArray, res: Resources, theme: Theme, q: Int) {
+        var textAppearance = 0
+        var fontStyle = Typeface.NORMAL
+        var fontFamily: String? = null
+        var text: CharSequence? = null
+        (0 until array.indexCount).forEach {
+            when (val index = array.getIndex(it)) {
+                StyleAttrs.textAppearance[q] -> textAppearance = array.getResourceIdOrThrow(index)
+                StyleAttrs.text[q] -> text = array.getText(index)
+                StyleAttrs.textSize[q] -> textSize = array.getDimensionOrThrow(index)
+                StyleAttrs.font[q] -> setTypeFace(array.getFont(index)
+                        ?: throw NullPointerException("Null typeFace?!"))
+                StyleAttrs.textColor[q] -> color = array.getColorStateList(index)!!
+                StyleAttrs.gravity[q] -> gravity = array.getIntOrThrow(index)
+                StyleAttrs.paddingHorizontal[q] -> paddingHorizontal = array.getDimensionPixelSize(index, 0)
+                StyleAttrs.paddingVertical[q] -> paddingVertical = array.getDimensionPixelSize(index, 0)
+                StyleAttrs.fontFamily[q] -> fontFamily = array.getString(index)
+                StyleAttrs.textStyle[q] -> fontStyle = array.getInt(index, Typeface.NORMAL)
+                StyleAttrs.padding[q] -> {
+                    val p = array.getDimensionPixelSize(index, 0)
+                    padding.forEachIndexed { index, _ ->
+                        padding[index] = p
+                    }
+                }
+            }
+        }
+        fontFamily?.let { setTypeFace(Typeface.create(it, fontStyle)) }
+        if (textAppearance != 0) {
+            setTextAppearance(textAppearance, res, theme)
+        }
+        //set text at the end, so layout is taking all the latest values
+        this.text = text
+    }
+
+    /**
+     * Update bounds based on the [textLayout] and [padding] size
+     */
     fun updateBoundsWithIntrinsicSize() {
         setBounds(0, 0, intrinsicWidth, intrinsicHeight)
     }
 
+    /**
+     * Get [textLayout] width including [paddingHorizontal]
+     */
     override fun getIntrinsicWidth(): Int {
-        return padding[0] + padding[2] + (textLayout?.getLineWidth(0)?.ceil() ?: 0)
+        return paddingHorizontal + (textLayout?.width ?: 0)
     }
 
+    /**
+     * Get [textLayout] height including [paddingVertical]
+     */
     override fun getIntrinsicHeight(): Int {
-        return padding[1] + padding[3] + (textLayout?.height ?: 0)
+        return paddingVertical + (textLayout?.height ?: 0)
     }
 
     override fun draw(canvas: Canvas) {
         textLayout?.let { textLayout ->
             val c = canvas.save()
-            Gravity.apply(gravity, intrinsicWidth, intrinsicHeight, dirtyBounds, tempRect, DrawableCompat.getLayoutDirection(this))
             //translate for gravity
+            Gravity.apply(gravity, intrinsicWidth, intrinsicHeight, dirtyBounds, tempRect, DrawableCompat.getLayoutDirection(this))
             canvas.translate(tempRect.left.toFloat(), tempRect.top.toFloat())
-            //canvas.drawRect(0f, 0f, intrinsicWidth.toFloat(), intrinsicHeight.toFloat(), debugPaint)
+
+            if (debug) {
+                canvas.drawRect(0f, 0f, intrinsicWidth.toFloat(), intrinsicHeight.toFloat(), debugPaint)
+                Log.d(TAG, "draw: alpha=${_alpha} isVisible:${isVisible} text:$text")
+            }
+
             //translate for internal padding
             canvas.translate(padding[0].toFloat(), padding[1].toFloat())
-            Log.d(TAG, "draw: alpha=${_alpha} isVisible:${isVisible} text:$text")
-            paint.withAlpha(_alpha) {
+            //changing alpha might be during transition from "parent" drawable
+            paint.withMultiplyingAlpha(_alpha) {
                 textLayout.draw(canvas)
             }
 
@@ -181,7 +249,7 @@ open class SuperTextDrawable : Drawable() {
     }
 
     override fun setAlpha(alpha: Int) {
-        Log.d(TAG, "setAlpha: alpha=${alpha}")
+        //don't set the alpha on textColor, this is not driven by UI state change
         _alpha = alpha
         invalidateSelf()
     }
@@ -211,6 +279,7 @@ open class SuperTextDrawable : Drawable() {
     }
 
     companion object {
+        private const val debug = true
         private val debugPaint by lazy {
             Paint().apply {
                 isAntiAlias = true
@@ -218,31 +287,64 @@ open class SuperTextDrawable : Drawable() {
                 color = 0x60000000
             }
         }
+
+        private const val TEXT_DRAWABLE = 0
+        private const val TEXT_APPEARANCE = 1
+
+        private object StyleAttrs {
+            //MIN_VALUE is to ignore textAppearance ref in textAppearance to avoid circular references
+            val textAppearance = ResPair(R.styleable.SuperTextDrawable_android_textAppearance, Int.MIN_VALUE)
+            val text = ResPair(R.styleable.SuperTextDrawable_android_text, R.styleable.CustomTextAppearance_android_textSize)
+            val textSize = ResPair(R.styleable.SuperTextDrawable_android_textSize, R.styleable.CustomTextAppearance_android_textSize)
+            val font = ResPair(R.styleable.SuperTextDrawable_android_font, R.styleable.CustomTextAppearance_android_font)
+            val textColor = ResPair(R.styleable.SuperTextDrawable_android_textColor, R.styleable.CustomTextAppearance_android_textColor)
+            val gravity = ResPair(R.styleable.SuperTextDrawable_android_gravity, R.styleable.CustomTextAppearance_android_gravity)
+            val paddingHorizontal =
+                    ResPair(R.styleable.SuperTextDrawable_android_paddingHorizontal, R.styleable.CustomTextAppearance_android_paddingHorizontal)
+            val paddingVertical = ResPair(R.styleable.SuperTextDrawable_android_paddingVertical, R.styleable.CustomTextAppearance_android_paddingVertical)
+            val fontFamily = ResPair(R.styleable.SuperTextDrawable_android_fontFamily, R.styleable.CustomTextAppearance_android_fontFamily)
+            val textStyle = ResPair(R.styleable.SuperTextDrawable_android_textStyle, R.styleable.CustomTextAppearance_android_textStyle)
+            val padding = ResPair(R.styleable.SuperTextDrawable_android_padding, R.styleable.CustomTextAppearance_android_padding)
+        }
+    }
+}
+
+private class ResPair(@StyleableRes private val first: Int, @StyleableRes private val second: Int) {
+    operator fun get(i: Int): Int {
+        return when (i) {
+            0 -> first
+            1 -> second
+            else -> throw IllegalStateException("Invalid index:$i")
+        }
     }
 }
 
 //TODO: common
-private fun Float.ceil() = kotlin.math.ceil(this.toDouble()).toInt()
+private fun Float.ceilInt() = kotlin.math.ceil(this.toDouble()).toInt()
 
 fun Drawable.obtainAttributes(
-    res: Resources,
-    theme: Theme?,
-    set: AttributeSet, attrs: IntArray
+        res: Resources,
+        theme: Theme?,
+        set: AttributeSet,
+        attrs: IntArray
 ): TypedArray {
     return if (theme == null) {
         res.obtainAttributes(set, attrs)
     } else theme.obtainStyledAttributes(set, attrs, 0, 0)
 }
 
-private inline fun Paint.withAlpha(new: Int, block: () -> Unit) {
+private inline fun Paint.withMultiplyingAlpha(new: Int, block: () -> Unit) {
     val old = this.alpha
-    this.alpha = new
+    //rather multiple instead of overwrite
+    //if paint had 0.5 and we needed 0.75, it would be higher then color from state
+    // will be => 0.5*0.75 = 0.375
+    this.alpha = (old * (new / 255f)).roundToInt().coerceIn(0, 255)
     block()
     this.alpha = old
 }
 
 private fun <T, R : Drawable> invalidating(initValue: T, block: (R.(T) -> Unit)? = null): DrawablePropertyDelegate<T, R> {
-    return DrawablePropertyDelegate(initValue) {v ->
+    return DrawablePropertyDelegate(initValue) { v ->
         block?.invoke(this, v)
         invalidateSelf()
     }

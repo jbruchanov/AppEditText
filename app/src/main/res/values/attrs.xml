@@ -18,22 +18,31 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="TextAppearanceSubset">
-        <attr name="android:textColor" />
-        <attr name="android:textSize" />
-        <attr name="android:font" />
-        <attr name="android:fontFamily" />
-        <attr name="android:textStyle" />
-    </declare-styleable>
-
     <declare-styleable name="SuperTextDrawable">
-        <attr name="android:text" />
         <attr name="android:textSize" />
         <attr name="android:textColor" />
+        <attr name="android:text" />
         <attr name="android:textAppearance" />
         <attr name="android:gravity" />
         <attr name="android:padding" />
         <attr name="android:paddingHorizontal" />
         <attr name="android:paddingVertical" />
+        <attr name="android:font" />
+        <attr name="android:fontFamily" />
+        <attr name="android:textStyle" />
     </declare-styleable>
+
+    <declare-styleable name="CustomTextAppearance">
+        <attr name="android:textSize" />
+        <attr name="android:textColor" />
+        <attr name="android:text" />
+        <attr name="android:gravity" />
+        <attr name="android:padding" />
+        <attr name="android:paddingHorizontal" />
+        <attr name="android:paddingVertical" />
+        <attr name="android:font" />
+        <attr name="android:fontFamily" />
+        <attr name="android:textStyle" />
+    </declare-styleable>
+
 </resources>
