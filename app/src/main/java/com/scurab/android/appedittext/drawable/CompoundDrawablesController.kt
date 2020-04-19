@@ -37,7 +37,7 @@ open class CompoundDrawablesController(
     val rightDrawable get() = right.drawable
     val bottomDrawable get() = bottom.drawable
 
-    private val drawableClickStrategies =
+    private val drawableBehaviours =
             Array<ICompoundDrawableBehaviour>(4) { i ->
                 CompoundDrawableBehaviour.None().also { it.onAttach(virtualViews[i]) }
             }
@@ -52,8 +52,12 @@ open class CompoundDrawablesController(
     private val bottom get() = virtualViews[3]
 
     override fun getCompoundDrawableClickStrategy(index: Int): ICompoundDrawableBehaviour {
-        return drawableClickStrategies[index]
+        return drawableBehaviours[index]
     }
+
+    //another workaround for late resolving of drawables
+    //setCompoundDrawableClickStrategyRelative might be called during view creation based on attrs
+    private var attachOnLayout = false
 
     override fun setCompoundDrawableClickStrategyRelative(
             index: Int,
@@ -61,9 +65,13 @@ open class CompoundDrawablesController(
     ) {
         val rtlIndex = drawablesHelper.transform(index)
         val virtualView = virtualViews[rtlIndex]
-        drawableClickStrategies[rtlIndex].onDetach()
-        drawableClickStrategies[rtlIndex] = behaviour
-        behaviour.onAttach(virtualView)
+        drawableBehaviours[rtlIndex].onDetach()
+        drawableBehaviours[rtlIndex] = behaviour
+        if (!host.isLaidOut) {
+            attachOnLayout = true
+        } else {
+            behaviour.onAttach(virtualView)
+        }
     }
 
     override fun onLayout() {
@@ -79,8 +87,12 @@ open class CompoundDrawablesController(
                 drawable = d as WrappingDrawable?
                 layout(it)
                 invalidateDrawableState()
+                if (attachOnLayout) {
+                    drawableBehaviours[it.index].onAttach(this)
+                }
             }
         }
+        attachOnLayout = false
     }
 
     private val debugPaint by lazy {
@@ -102,7 +114,7 @@ open class CompoundDrawablesController(
     }
 
     protected open fun dispatchClick(view: VirtualView) {
-        drawableClickStrategies[view.id].onClick()
+        drawableBehaviours[view.id].onClick()
     }
 
     override fun drawableStateChanged() {
