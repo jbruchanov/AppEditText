@@ -9,7 +9,8 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import com.scurab.android.appedittext.databinding.ActivityMainBinding
 import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
-import java.util.*
+import com.scurab.android.appedittext.drawable.SuperTextDrawable
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,20 +20,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.case3.apply {
-            //wee need more powerful text drawable
-            //-> stateful, gravity, text appereance, base line alignment,
-            // correctly working in the stateListDrawable, fill height etc
-            val sld = StateListDrawable()
+            val sld = object: StateListDrawable() {
+                override fun setConstantState(state: DrawableContainerState) {
+                    //necessary for different text sizes and correct "center" alignment
+                    state.isConstantSize = true
+                    super.setConstantState(state)
+                }
+            }
             sld.addState(
                 intArrayOf(android.R.attr.state_enabled, android.R.attr.state_checked),
-                TextDrawable("Hide", this@MainActivity, R.style.labelTextAppearance)
+                SuperTextDrawable(R.string.action_hide, this@MainActivity, R.style.labelTextAppearance)
             )
 
             sld.addState(
                 StateSet.WILD_CARD,
-                TextDrawable("Show", this@MainActivity, R.style.labelTextAppearance)
+                SuperTextDrawable("Show", this@MainActivity, R.style.labelTextAppearance)
             )
-
             setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, sld, null)
         }
 

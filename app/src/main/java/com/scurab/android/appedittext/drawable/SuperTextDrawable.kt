@@ -1,5 +1,6 @@
 package com.scurab.android.appedittext.drawable
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.content.res.Resources.Theme
@@ -19,6 +20,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import androidx.annotation.Px
+import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import androidx.annotation.StyleableRes
 import androidx.core.content.res.getDimensionOrThrow
@@ -32,9 +34,28 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-open class SuperTextDrawable : Drawable() {
+open class SuperTextDrawable() : Drawable() {
+
+    constructor(text: CharSequence?) : this() {
+        this.text = text
+        updateBoundsWithIntrinsicSize()
+    }
+
+    constructor(
+        @StringRes textResId: Int,
+        context: Context,
+        @StyleRes textAppearance: Int = 0
+    ) : this(context.getText(textResId), context, textAppearance)
+
+    constructor(text: CharSequence?, context: Context, @StyleRes textAppearance: Int = 0) : this() {
+        this.text = text
+        if (textAppearance != 0) {
+            setTextAppearance(textAppearance, context.resources, context.theme)
+        }
+        updateBoundsWithIntrinsicSize()
+    }
+
     private var _alpha: Int = 255
-    private val TAG = "SuperTextDrawable"
 
     /**
      * Text layout.
@@ -113,7 +134,8 @@ open class SuperTextDrawable : Drawable() {
     protected val paint = TextPaint().apply {
         isAntiAlias = true
         textSize = Resources.getSystem().displayMetrics.scaledDensity * 12
-        color = Color.BLACK
+        color = Color.CYAN
+        style = Paint.Style.FILL
     }
 
     private val tempRect = Rect()
@@ -161,9 +183,16 @@ open class SuperTextDrawable : Drawable() {
      * Follow [R.attr.CustomTextAppearance] for supported fields
      */
     fun setTextAppearance(@StyleRes resId: Int, res: Resources, theme: Theme) {
+        val oldLayout = textLayout
         val array: TypedArray = theme.obtainStyledAttributes(resId, R.styleable.CustomTextAppearance)
         initValueFromAttrs(array, res, theme, TEXT_APPEARANCE)
         array.recycle()
+        //if same, rather rebuild whole layout
+        if (textLayout == oldLayout) {
+            buildLayout()
+            updateBoundsWithIntrinsicSize()
+            invalidateSelf()
+        }
     }
 
     private fun initValueFromAttrs(array: TypedArray, res: Resources, theme: Theme, q: Int) {
@@ -197,7 +226,9 @@ open class SuperTextDrawable : Drawable() {
             setTextAppearance(textAppearance, res, theme)
         }
         //set text at the end, so layout is taking all the latest values
-        this.text = text
+        if (q == TEXT_DRAWABLE && text != null) {
+            this.text = text
+        }
     }
 
     /**
@@ -228,7 +259,7 @@ open class SuperTextDrawable : Drawable() {
             Gravity.apply(gravity, intrinsicWidth, intrinsicHeight, dirtyBounds, tempRect, DrawableCompat.getLayoutDirection(this))
             canvas.translate(tempRect.left.toFloat(), tempRect.top.toFloat())
 
-            if (debug) {
+            if (DEBUG) {
                 canvas.drawRect(0f, 0f, intrinsicWidth.toFloat(), intrinsicHeight.toFloat(), debugPaint)
                 Log.d(TAG, "draw: alpha=${_alpha} isVisible:${isVisible} text:$text")
             }
@@ -279,22 +310,26 @@ open class SuperTextDrawable : Drawable() {
     }
 
     companion object {
-        private const val debug = true
+        private const val TEXT_DRAWABLE = 0
+        private const val TEXT_APPEARANCE = 1
+
+        private val TAG = "SuperTextDrawable"
+        private const val DEBUG = false
+
         private val debugPaint by lazy {
             Paint().apply {
                 isAntiAlias = true
                 style = Paint.Style.FILL
-                color = 0x60000000
+                color = 0x10000000
             }
         }
 
-        private const val TEXT_DRAWABLE = 0
-        private const val TEXT_APPEARANCE = 1
-
+        //simple helper class to handle drawable attrs and textappearance by same code
+        //looks like there is no simple way of doing it just by 1 attrSet
         private object StyleAttrs {
             //MIN_VALUE is to ignore textAppearance ref in textAppearance to avoid circular references
             val textAppearance = ResPair(R.styleable.SuperTextDrawable_android_textAppearance, Int.MIN_VALUE)
-            val text = ResPair(R.styleable.SuperTextDrawable_android_text, R.styleable.CustomTextAppearance_android_textSize)
+            val text = ResPair(R.styleable.SuperTextDrawable_android_text, R.styleable.CustomTextAppearance_android_text)
             val textSize = ResPair(R.styleable.SuperTextDrawable_android_textSize, R.styleable.CustomTextAppearance_android_textSize)
             val font = ResPair(R.styleable.SuperTextDrawable_android_font, R.styleable.CustomTextAppearance_android_font)
             val textColor = ResPair(R.styleable.SuperTextDrawable_android_textColor, R.styleable.CustomTextAppearance_android_textColor)

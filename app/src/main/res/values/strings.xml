@@ -4,4 +4,7 @@
     <string name="a11y_action_clear_text">Clear text</string>
     <string name="a11y_action_show_password">Show password</string>
     <string name="a11y_action_hide_password">Hide password</string>
+
+    <string name="action_show">Show</string>
+    <string name="action_hide">Hide</string>
 </resources>

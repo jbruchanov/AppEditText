@@ -9,10 +9,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
-import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
-import com.scurab.android.appedittext.drawable.CompoundDrawablesAccessibilityDelegate
-import com.scurab.android.appedittext.drawable.CompoundDrawablesController
-import com.scurab.android.appedittext.drawable.ICompoundDrawableBehaviour
+import com.scurab.android.appedittext.drawable.*
 
 open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
     AppCompatEditText(context, attrs, defStyleAttr) {
@@ -142,10 +139,12 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
                 .forEach {
                     when(val index = typedArray.getIndex(it)) {
                         R.styleable.AppEditText_compoundDrawableLeftTitle -> {
-                            pendingDrawable[0] = TextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
+                            //TODO: default styling
+                            pendingDrawable[0] = SuperTextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
                         }
                         R.styleable.AppEditText_compoundDrawableRightTitle -> {
-                            pendingDrawable[2] = TextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
+                            //TODO: default styling
+                            pendingDrawable[2] = SuperTextDrawable(typedArray.getText(index), context, R.style.labelTextAppearance)
                         }
                         R.styleable.AppEditText_compoundDrawableRightBehaviour -> {
                             when(typedArray.getInt(index, BEHAVIOUR_NONE)) {
