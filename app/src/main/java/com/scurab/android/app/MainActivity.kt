@@ -33,7 +33,8 @@ class MainActivity : AppCompatActivity() {
 class MenuFragment : Fragment() {
 
     private val list = listOf(
-            "Usecases" to DefinedUseCasesFragment::class.java
+            "Usecases" to DefinedUseCasesFragment::class.java,
+            "Other usecases" to OtherUseCasesFragment::class.java
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
