@@ -13,6 +13,10 @@ fun Boolean.sign() = if (this) 1 else -1
 
 fun Float.ceilInt() = kotlin.math.ceil(this.toDouble()).toInt()
 
+fun Drawable.setIntrinsicBounds() {
+    setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+}
+
 fun Drawable.obtainAttributes(
         res: Resources,
         theme: Resources.Theme?,

@@ -135,7 +135,7 @@ open class CompoundDrawablesController(
         }
     }
 
-    private fun Drawable.wrapped(): WrappingDrawable = WrappingDrawable.wrapped(this)
+    fun Drawable.wrapped(): WrappingDrawable = WrappingDrawable.wrapped(this)
 
     private var debugDrawCounter = 0
     internal fun debugDraw(canvas: Canvas) {
