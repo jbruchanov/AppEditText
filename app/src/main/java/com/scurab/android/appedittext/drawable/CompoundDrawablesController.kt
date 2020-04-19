@@ -4,12 +4,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.os.SystemClock
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import com.scurab.android.appedittext.toShortString
+import com.scurab.android.app.toShortString
 
 interface ICompoundDrawablesController {
     val host: View

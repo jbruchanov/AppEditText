@@ -28,6 +28,10 @@ import androidx.core.content.res.getIntOrThrow
 import androidx.core.content.res.getResourceIdOrThrow
 import androidx.core.graphics.drawable.DrawableCompat
 import com.scurab.android.appedittext.R
+import com.scurab.android.appedittext.ceilInt
+import com.scurab.android.appedittext.invalidating
+import com.scurab.android.appedittext.obtainAttributes
+import com.scurab.android.appedittext.withMultiplyingAlpha
 import org.xmlpull.v1.XmlPullParser
 import kotlin.math.max
 import kotlin.math.min
@@ -373,48 +377,5 @@ private class ResPair(@StyleableRes private val first: Int, @StyleableRes privat
             1 -> second
             else -> throw IllegalStateException("Invalid index:$i")
         }
-    }
-}
-
-//TODO: common
-private fun Float.ceilInt() = kotlin.math.ceil(this.toDouble()).toInt()
-
-fun Drawable.obtainAttributes(
-        res: Resources,
-        theme: Theme?,
-        set: AttributeSet,
-        attrs: IntArray
-): TypedArray {
-    return if (theme == null) {
-        res.obtainAttributes(set, attrs)
-    } else theme.obtainStyledAttributes(set, attrs, 0, 0)
-}
-
-private inline fun Paint.withMultiplyingAlpha(new: Int, block: () -> Unit) {
-    val old = this.alpha
-    //rather multiple instead of overwrite
-    //if paint had 0.5 and we needed 0.75, it would be higher then color from state
-    // will be => 0.5*0.75 = 0.375
-    this.alpha = (old * (new / 255f)).roundToInt().coerceIn(0, 255)
-    block()
-    this.alpha = old
-}
-
-private fun <T, R : Drawable> invalidating(initValue: T, block: (R.(T) -> Unit)? = null): DrawablePropertyDelegate<T, R> {
-    return DrawablePropertyDelegate(initValue) { v ->
-        block?.invoke(this, v)
-        invalidateSelf()
-    }
-}
-
-class DrawablePropertyDelegate<T, R : Drawable>(initValue: T, private val onSetAction: R.(T) -> Unit) : ReadWriteProperty<R, T> {
-    private var value: T? = initValue
-    override fun getValue(thisRef: R, property: KProperty<*>): T {
-        return value as T
-    }
-
-    override fun setValue(thisRef: R, property: KProperty<*>, value: T) {
-        this.value = value
-        onSetAction(thisRef, value)
     }
 }

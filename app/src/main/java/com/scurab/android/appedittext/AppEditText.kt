@@ -68,8 +68,8 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     /**
      * Set a behaviour for the drawables.
-     * As Behaviours might stateful they are not persisted during [onSaveInstanceState].
-     * It's developer's responsibility to handle it manually.
+     * As Behaviours might stateful with complex un-serializable data (click listener, etc), hence they are not persisted during [onSaveInstanceState].
+     * It's developer's responsibility to handle it manually if necessary
      */
     fun setCompoundDrawableBehaviour(index: Int, behaviour: ICompoundDrawableBehaviour) {
         compoundDrawablesController.setCompoundDrawableClickStrategy(index, behaviour)
@@ -151,7 +151,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (false/*debug*/) {
+        if (true/*debug*/) {
             compoundDrawablesController.debugDraw(canvas)
         }
     }

@@ -1,4 +1,4 @@
-package com.scurab.android.appedittext
+package com.scurab.android.app
 
 import android.view.MotionEvent
 
