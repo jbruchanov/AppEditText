@@ -33,7 +33,10 @@ open class VirtualView(
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
-    val isFocused get() = host.isFocused
+    //TODO: is this check enough ?
+    //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird as it's like
+    //frozen ripple
+    val isFocused get() = drawable?.wrappedDrawable !is RippleDrawable && host.isFocused
 
     private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
 
@@ -181,12 +184,10 @@ open class VirtualView(
         //I'd guess that in drawable hierarchy the array maybe copied or reused
         //hence it's safer to do same thing what google does.
         //If this was broken, UI states weren't changing as expected
-
         //TODO:  extract this into own place, so anyone could add new state more easily with hiding the complexity about these arrays
         private val StatePromises = arrayOf<Pair<Int, (VirtualView) -> Boolean>>(
             android.R.attr.state_enabled to { v -> v.isEnabled },
-            //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird
-            android.R.attr.state_focused to { v -> v.drawable?.wrappedDrawable !is RippleDrawable && v.isFocused },
+            android.R.attr.state_focused to { v -> v.isFocused },
             android.R.attr.state_pressed to { v -> v.isPressed },
             android.R.attr.state_checkable to { v -> v.isCheckable },
             android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },
