@@ -29,6 +29,8 @@ import androidx.core.content.res.getResourceIdOrThrow
 import androidx.core.graphics.drawable.DrawableCompat
 import com.scurab.android.appedittext.R
 import org.xmlpull.v1.XmlPullParser
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -88,6 +90,12 @@ open class SuperTextDrawable() : Drawable() {
     var textAlignment by invalidating(Layout.Alignment.ALIGN_CENTER) {
         buildLayout()
     }
+
+    var minTextWidth : Int by invalidating(0)
+    override fun getMinimumWidth(): Int = minTextWidth
+
+    var minTextHeight : Int by invalidating(0)
+    override fun getMinimumHeight(): Int = minTextHeight
 
     /**
      * Text size in Pix
@@ -161,7 +169,7 @@ open class SuperTextDrawable() : Drawable() {
             StaticLayout(
                     it,
                     paint,
-                    paint.measureText(it, 0, it.length).ceilInt(),
+                    max(minTextWidth, paint.measureText(it, 0, it.length).ceilInt()),
                     Layout.Alignment.ALIGN_CENTER,
                     1f/*extra line spacing * coef */,
                     0f/*extra line spacing + coef */,
@@ -213,6 +221,8 @@ open class SuperTextDrawable() : Drawable() {
                 StyleAttrs.paddingVertical[q] -> paddingVertical = array.getDimensionPixelSize(index, 0)
                 StyleAttrs.fontFamily[q] -> fontFamily = array.getString(index)
                 StyleAttrs.textStyle[q] -> fontStyle = array.getInt(index, Typeface.NORMAL)
+                StyleAttrs.minWidth[q] -> minTextWidth = array.getDimensionPixelSize(index, 0)
+                StyleAttrs.minHeight[q] -> minTextHeight = array.getDimensionPixelSize(index, 0)
                 StyleAttrs.padding[q] -> {
                     val p = array.getDimensionPixelSize(index, 0)
                     padding.forEachIndexed { index, _ ->
@@ -242,21 +252,31 @@ open class SuperTextDrawable() : Drawable() {
      * Get [textLayout] width including [paddingHorizontal]
      */
     override fun getIntrinsicWidth(): Int {
-        return paddingHorizontal + (textLayout?.width ?: 0)
+        return max(minTextWidth, paddingHorizontal + textWidth)
     }
 
     /**
      * Get [textLayout] height including [paddingVertical]
      */
     override fun getIntrinsicHeight(): Int {
-        return paddingVertical + (textLayout?.height ?: 0)
+        return max(minTextHeight, paddingVertical + textHeight)
     }
+
+    /**
+     * Get [textLayout] width
+     */
+    val textWidth get() = (textLayout?.width ?: 0)
+
+    /**
+     * Get [textLayout] height
+     */
+    val textHeight get() = (textLayout?.height ?: 0)
 
     override fun draw(canvas: Canvas) {
         textLayout?.let { textLayout ->
             val c = canvas.save()
             //translate for gravity
-            Gravity.apply(gravity, intrinsicWidth, intrinsicHeight, dirtyBounds, tempRect, DrawableCompat.getLayoutDirection(this))
+            Gravity.apply(gravity, textWidth + paddingHorizontal, textHeight + paddingVertical, dirtyBounds, tempRect, DrawableCompat.getLayoutDirection(this))
             canvas.translate(tempRect.left.toFloat(), tempRect.top.toFloat())
 
             if (DEBUG) {
@@ -340,6 +360,8 @@ open class SuperTextDrawable() : Drawable() {
             val fontFamily = ResPair(R.styleable.SuperTextDrawable_android_fontFamily, R.styleable.CustomTextAppearance_android_fontFamily)
             val textStyle = ResPair(R.styleable.SuperTextDrawable_android_textStyle, R.styleable.CustomTextAppearance_android_textStyle)
             val padding = ResPair(R.styleable.SuperTextDrawable_android_padding, R.styleable.CustomTextAppearance_android_padding)
+            val minWidth = ResPair(R.styleable.SuperTextDrawable_android_minWidth, R.styleable.CustomTextAppearance_android_minWidth)
+            val minHeight = ResPair(R.styleable.SuperTextDrawable_android_minHeight, R.styleable.CustomTextAppearance_android_minHeight)
         }
     }
 }

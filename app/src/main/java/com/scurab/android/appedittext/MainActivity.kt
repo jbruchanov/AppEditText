@@ -41,17 +41,13 @@ class MainActivity : AppCompatActivity() {
 
             sld.addState(
                     StateSet.WILD_CARD,
-                    SuperTextDrawable("Show", this@MainActivity, R.style.labelTextAppearance).apply {
-                        updatePaddingForSquareSize(44)
-                    }
+                    SuperTextDrawable("Show", this@MainActivity, R.style.labelTextAppearance)
             )
             setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ripple(sld), null)
         }
 
         binding.case5.apply {
-            val d = SuperTextDrawable(R.string.action_clear, this@MainActivity, R.style.labelTextAppearance).apply {
-                updatePaddingForSquareSize(44)
-            }
+            val d = SuperTextDrawable(R.string.action_clear, this@MainActivity, R.style.labelTextAppearance)
             setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ripple(d), null)
         }
 
@@ -94,12 +90,6 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
-    }
-
-    private fun SuperTextDrawable.updatePaddingForSquareSize(@Dimension(unit = Dimension.DP) expectedSize: Int) {
-        val size = expectedSize/*dps*/ * resources.displayMetrics.density
-        paddingVertical = (size - intrinsicHeight).roundToInt()
-        paddingHorizontal = (size - intrinsicWidth).roundToInt()
     }
 
     private fun ripple(drawable: Drawable): RippleDrawable {

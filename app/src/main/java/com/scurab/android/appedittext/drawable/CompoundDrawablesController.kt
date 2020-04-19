@@ -123,6 +123,7 @@ open class CompoundDrawablesController(
 
     private fun Drawable.wrapped(): WrappingDrawable = WrappingDrawable.wrapped(this)
 
+    private var debugDrawCounter = 0
     internal fun debugDraw(canvas: Canvas) {
         canvas.save()
         canvas.translate(host.scrollX.toFloat(), host.scrollY.toFloat())
@@ -131,7 +132,7 @@ open class CompoundDrawablesController(
         //to see easily where is origin
         canvas.drawCircle(0f, 0f, 5f, debugPaint)
         //just simple counter to seeing refreshes
-        canvas.drawText((SystemClock.uptimeMillis() % 10).toString(), 20f, 20f, debugPaint)
+        canvas.drawText((debugDrawCounter++ % 10).toString(), 20f, 30f, debugPaint)
         //draw cross
         canvas.drawLine(
             0f,
