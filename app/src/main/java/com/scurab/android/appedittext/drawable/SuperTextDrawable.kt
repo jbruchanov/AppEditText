@@ -115,8 +115,8 @@ open class SuperTextDrawable() : Drawable() {
     var paddingHorizontal: Int
         get() = padding[0] + padding[2]
         set(value) {
-            padding[0] = value
-            padding[2] = value
+            padding[0] = value / 2
+            padding[2] = value / 2
             invalidateSelf()
         }
 
@@ -126,8 +126,8 @@ open class SuperTextDrawable() : Drawable() {
     var paddingVertical: Int
         get() = padding[1] + padding[3]
         set(value) {
-            padding[1] = value
-            padding[3] = value
+            padding[1] = value / 2
+            padding[3] = value / 2
             invalidateSelf()
         }
 

@@ -75,12 +75,10 @@
             android:id="@+id/case5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/ic_password"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableLeftTitle="Label"
-            app:compoundDrawableRightBehaviour="clear"
-            app:compoundDrawableRightTitle="Clear" />
+            app:compoundDrawableLeftTitle="Label5"
+            app:compoundDrawableRightBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
