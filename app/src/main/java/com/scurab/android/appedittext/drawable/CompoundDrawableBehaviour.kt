@@ -133,6 +133,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         }
 
         open fun dispatchUpdateDrawable(drawable: Drawable?) {
+            //absolute indexing is correct
             virtualView.host.setCompoundDrawable(
                 virtualView.id,
                 drawable

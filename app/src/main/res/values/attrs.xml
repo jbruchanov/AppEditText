@@ -9,9 +9,9 @@
     <attr name="labelTextAppearance"></attr>
 
     <declare-styleable name="AppEditText">
-        <attr name="compoundDrawableLeftTitle" format="string" />
-        <attr name="compoundDrawableRightTitle" format="string" />
-        <attr name="compoundDrawableRightBehaviour" format="enum">
+        <attr name="compoundDrawableStartTitle" format="string" />
+        <attr name="compoundDrawableEndTitle" format="string" />
+        <attr name="compoundDrawableEndBehaviour" format="enum">
             <enum name="none" value="0" />
             <enum name="clear" value="1" />
             <enum name="password" value="2" />

@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:hint="This is a hint"
             android:inputType="text"
-            app:compoundDrawableLeftTitle="Label" />
+            app:compoundDrawableStartTitle="Label" />
 
         <TextView
             android:layout_width="match_parent"
@@ -37,7 +37,7 @@
             android:drawableRight="@drawable/ic_clear"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableRightBehaviour="clear" />
+            app:compoundDrawableEndBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:text="Hello World!"
-            app:compoundDrawableRightBehaviour="password" />
+            app:compoundDrawableEndBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -64,7 +64,7 @@
             android:drawableRight="@drawable/ic_password"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableRightBehaviour="password" />
+            app:compoundDrawableEndBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -77,8 +77,8 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableLeftTitle="Label5"
-            app:compoundDrawableRightBehaviour="clear" />
+            app:compoundDrawableStartTitle="Label5"
+            app:compoundDrawableEndBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -92,8 +92,8 @@
             android:drawableRight="@drawable/ic_clear"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableLeftTitle="Label"
-            app:compoundDrawableRightBehaviour="clear" />
+            app:compoundDrawableStartTitle="Label"
+            app:compoundDrawableEndBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -108,7 +108,7 @@
             android:enabled="false"
             android:inputType="text"
             android:text="Hello World!"
-            app:compoundDrawableRightBehaviour="clear" />
+            app:compoundDrawableEndBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -123,9 +123,9 @@
             android:enabled="false"
             android:hint="This is a hint"
             android:inputType="text"
-            app:compoundDrawableLeftTitle="Label"
-            app:compoundDrawableRightBehaviour="clear"
-            app:compoundDrawableRightTitle="Clear" />
+            app:compoundDrawableStartTitle="Label"
+            app:compoundDrawableEndBehaviour="clear"
+            app:compoundDrawableEndTitle="Clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -139,8 +139,8 @@
             android:drawableRight="@drawable/ic_password"
             android:hint="This is a hint"
             android:inputType="textPassword"
-            app:compoundDrawableLeftTitle="Pwd:"
-            app:compoundDrawableRightBehaviour="password" />
+            app:compoundDrawableStartTitle="Pwd:"
+            app:compoundDrawableEndBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -156,8 +156,8 @@
             android:hint="This is a hint"
             android:inputType="textPassword"
             android:text="123"
-            app:compoundDrawableLeftTitle="Pwd:"
-            app:compoundDrawableRightBehaviour="password" />
+            app:compoundDrawableStartTitle="Pwd:"
+            app:compoundDrawableEndBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"
@@ -170,7 +170,7 @@
             android:layout_height="wrap_content"
             android:drawableRight="@drawable/ic_clear"
             android:text="123"
-            app:compoundDrawableRightBehaviour="clear" />
+            app:compoundDrawableEndBehaviour="clear" />
 
         <TextView
             android:layout_width="match_parent"
@@ -184,7 +184,7 @@
             android:drawableRight="@drawable/ic_password"
             android:inputType="textPassword"
             android:text="123"
-            app:compoundDrawableRightBehaviour="password" />
+            app:compoundDrawableEndBehaviour="password" />
 
         <TextView
             android:layout_width="match_parent"

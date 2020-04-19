@@ -5,6 +5,7 @@
     <item name="action_show_password" type="id" />
     <item name="action_hide_password" type="id" />
     <item name="action_announce_password" type="id" />
+    <item name="tag_infinite_loop_check" type="id" />
 
 
     <dimen name="input_field_stroke_width">1dp</dimen>

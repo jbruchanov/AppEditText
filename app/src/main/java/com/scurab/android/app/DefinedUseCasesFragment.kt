@@ -18,6 +18,7 @@ import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.databinding.FragmentUsecasesBinding
 import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
 import com.scurab.android.appedittext.drawable.SuperTextDrawable
+import com.scurab.android.appedittext.setCompoundDrawableRelative
 import java.util.Locale
 
 class DefinedUseCasesFragment : Fragment() {
@@ -56,7 +57,7 @@ class DefinedUseCasesFragment : Fragment() {
 
             views.case5.apply {
                 val d = SuperTextDrawable(R.string.action_clear, requireContext(), R.style.labelTextAppearance)
-                setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ripple(d), null)
+                setCompoundDrawableRelative(0, ripple(d), true)
             }
 
             views.case11.let { edittext ->
@@ -86,7 +87,7 @@ class DefinedUseCasesFragment : Fragment() {
             }
 
             views.case13.apply {
-                setCompoundDrawableBehaviour(2, CompoundDrawableBehaviour.Button("a11y") { i, v ->
+                setCompoundDrawableBehaviourRelative(2, CompoundDrawableBehaviour.Button("a11y") { i, v ->
                     var txt = this.text?.toString() ?: ""
                     if (txt.isNotEmpty()) {
                         txt = if (Character.isUpperCase(txt[0])) {

@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.scurab.android.app.toShortString
+import com.scurab.android.appedittext.RtlDrawableIndexes
 
 interface ICompoundDrawablesController {
     val host: View
@@ -17,20 +18,18 @@ interface ICompoundDrawablesController {
     //endregion to call from view
     fun dispatchTouchEvent(event: MotionEvent): Boolean
     fun onLayout()
-    fun onAttachedToWindow(pendingDrawables: Array<Drawable?>)
     fun drawableStateChanged()
     //endregion
 
-    fun setCompoundDrawables(l: Drawable?, t: Drawable?, r: Drawable?, b: Drawable?)
     fun getCompoundDrawableClickStrategy(index: Int): ICompoundDrawableBehaviour
-    fun setCompoundDrawableClickStrategy(index: Int, behaviour: ICompoundDrawableBehaviour)
+    fun setCompoundDrawableClickStrategyRelative(index: Int, behaviour: ICompoundDrawableBehaviour)
 }
 
 open class CompoundDrawablesController(
-        override val host: TextView,
-        private val viewDrawableSetter: (Drawable?, Drawable?, Drawable?, Drawable?) -> Unit
+        override val host: TextView
 ) : ICompoundDrawablesController {
 
+    private val drawablesHelper = RtlDrawableIndexes(host.context)
     private val touchListener = { id: Int, view: VirtualView -> dispatchClick(view) }
     override val virtualViews = Array(4) { VirtualView(it, host, touchListener) }.toList()
     val leftDrawable get() = left.drawable
@@ -46,6 +45,7 @@ open class CompoundDrawablesController(
     /* Flag to optimize unnecessary setState calls */
     private var isDirty = false
 
+    //absolute positioning, RTL handled in setCompoundDrawableClickStrategyRelative
     private val left get() = virtualViews[0]
     private val top get() = virtualViews[1]
     private val right get() = virtualViews[2]
@@ -55,33 +55,28 @@ open class CompoundDrawablesController(
         return drawableClickStrategies[index]
     }
 
-    override fun setCompoundDrawableClickStrategy(
+    override fun setCompoundDrawableClickStrategyRelative(
             index: Int,
             behaviour: ICompoundDrawableBehaviour
     ) {
-        val virtualView = virtualViews[index]
-        drawableClickStrategies[index].onDetach()
-        drawableClickStrategies[index] = behaviour
+        val rtlIndex = drawablesHelper.transform(index)
+        val virtualView = virtualViews[rtlIndex]
+        drawableClickStrategies[rtlIndex].onDetach()
+        drawableClickStrategies[rtlIndex] = behaviour
         behaviour.onAttach(virtualView)
     }
 
-    open fun setCompoundDrawables(drawables: Array<Drawable?>) {
-        val (l, t, r, b) = drawables
-        setCompoundDrawables(l, t, r, b)
-    }
-
-    override fun setCompoundDrawables(l: Drawable?, t: Drawable?, r: Drawable?, b: Drawable?) {
-        left.drawable = l?.wrapped()
-        top.drawable = t?.wrapped()
-        right.drawable = r?.wrapped()
-        bottom.drawable = b?.wrapped()
-        viewDrawableSetter(leftDrawable, topDrawable, rightDrawable, bottomDrawable)
-        onLayout()
-    }
-
     override fun onLayout() {
+        val compoundDrawables = host.compoundDrawables
         DefaultAndroidCompoundDrawableLayout.values().forEach {
             virtualViews[it.index].apply {
+                val d = compoundDrawables[it.index]
+                if (d != null && d !is WrappingDrawable) {
+                    throw IllegalStateException("Drawable for index:${it.index} should be already " +
+                            "wrapped in ${WrappingDrawable::class.java}, but it's ${d.javaClass.name}." +
+                            "All drawables has to be wrapped before layout")
+                }
+                drawable = d as WrappingDrawable?
                 layout(it)
                 invalidateDrawableState()
             }
@@ -104,25 +99,6 @@ open class CompoundDrawablesController(
         val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
         isDirty = handled || isDirty
         return handled
-    }
-
-    override fun onAttachedToWindow(pendingDrawables: Array<Drawable?>) {
-        //set drawables from through our delegate
-        //needs to be done later, because of rtl resolution
-        val viewsDrawables = host.compoundDrawables
-        pendingDrawables.forEachIndexed { i, d ->
-            //prefer already set drawables, could be from code, right after inflation
-            viewsDrawables[i] = viewsDrawables[i] ?: d
-            pendingDrawables[i] = null
-        }
-
-        viewsDrawables.forEach { v ->
-            //set only views with obviously empty bounds
-            //if there was something in code already set, just ignore it
-            v?.takeIf { it.dirtyBounds.isEmpty }
-                    ?.let { it.setBounds(0, 0, it.intrinsicWidth, it.intrinsicHeight) }
-        }
-        setCompoundDrawables(viewsDrawables)
     }
 
     protected open fun dispatchClick(view: VirtualView) {
