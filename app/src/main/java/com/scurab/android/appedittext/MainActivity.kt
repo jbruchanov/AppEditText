@@ -36,12 +36,12 @@ class MainActivity : AppCompatActivity() {
             }
             sld.addState(
                     intArrayOf(android.R.attr.state_enabled, android.R.attr.state_checked),
-                    SuperTextDrawable(R.string.action_hide, this@MainActivity, R.style.labelTextAppearance)
+                    SuperTextDrawable(R.string.action_show, this@MainActivity, R.style.labelTextAppearance)
             )
 
             sld.addState(
                     StateSet.WILD_CARD,
-                    SuperTextDrawable("Show", this@MainActivity, R.style.labelTextAppearance)
+                    SuperTextDrawable("Hide", this@MainActivity, R.style.labelTextAppearance)
             )
             setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ripple(sld), null)
         }
