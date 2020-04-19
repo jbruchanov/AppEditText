@@ -143,6 +143,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
             virtualView.host.addTextChangedListener(textWatcher)
+            textWatcher.onTextChanged(virtualView.host.text, 0, -1, virtualView.host.text.length)
         }
 
         override fun onDetach() {
