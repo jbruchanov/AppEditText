@@ -10,7 +10,6 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
-import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatEditText
@@ -35,7 +34,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         pending drawables set via xml, we have to wait until rtl it's resolved,
         otherwise left/right compound drawables are not set and might be lost
      */
-    private val pendingDrawable: Array<Drawable?> = arrayOfNulls<Drawable?>(4)
+    private val pendingDrawables: Array<Drawable?> = arrayOfNulls<Drawable?>(4)
 
     /**
      * Error state for the view.
@@ -77,20 +76,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        //set drawables from through our delegate
-        //needs to be done later, because of rtl resolution
-        val viewsDrawables = compoundDrawables
-        pendingDrawable.forEachIndexed { i, d ->
-            viewsDrawables[i] = d ?: viewsDrawables[i]
-            pendingDrawable[i] = null
-        }
-        super.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            viewsDrawables[0],
-            viewsDrawables[1],
-            viewsDrawables[2],
-            viewsDrawables[3]
-        )
-        compoundDrawablesController.onAttachedToWindow()
+        compoundDrawablesController.onAttachedToWindow(pendingDrawables)
     }
 
     override fun setCompoundDrawables(
@@ -179,7 +165,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
                     when (val index = typedArray.getIndex(it)) {
                         R.styleable.AppEditText_compoundDrawableLeftTitle -> {
                             //TODO: default styling
-                            pendingDrawable[0] = SuperTextDrawable(
+                            pendingDrawables[0] = SuperTextDrawable(
                                 typedArray.getText(index),
                                 context,
                                 R.style.labelTextAppearance
@@ -187,7 +173,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
                         }
                         R.styleable.AppEditText_compoundDrawableRightTitle -> {
                             //TODO: default styling
-                            pendingDrawable[2] = SuperTextDrawable(
+                            pendingDrawables[2] = SuperTextDrawable(
                                 typedArray.getText(index),
                                 context,
                                 R.style.labelTextAppearance

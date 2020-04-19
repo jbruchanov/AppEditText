@@ -17,7 +17,7 @@ interface ICompoundDrawablesController {
     //endregion to call from view
     fun dispatchTouchEvent(event: MotionEvent): Boolean
     fun onLayout()
-    fun onAttachedToWindow()
+    fun onAttachedToWindow(pendingDrawables: Array<Drawable?>)
     fun drawableStateChanged()
     //endregion
 
@@ -27,8 +27,8 @@ interface ICompoundDrawablesController {
 }
 
 open class CompoundDrawablesController(
-    override val host: TextView,
-    private val viewDrawableSetter: (Drawable?, Drawable?, Drawable?, Drawable?) -> Unit
+        override val host: TextView,
+        private val viewDrawableSetter: (Drawable?, Drawable?, Drawable?, Drawable?) -> Unit
 ) : ICompoundDrawablesController {
 
     private val touchListener = { id: Int, view: VirtualView -> dispatchClick(view) }
@@ -39,9 +39,9 @@ open class CompoundDrawablesController(
     val bottomDrawable get() = bottom.drawable
 
     private val drawableClickStrategies =
-        Array<ICompoundDrawableBehaviour>(4) { i ->
-            CompoundDrawableBehaviour.None().also { it.onAttach(virtualViews[i]) }
-        }
+            Array<ICompoundDrawableBehaviour>(4) { i ->
+                CompoundDrawableBehaviour.None().also { it.onAttach(virtualViews[i]) }
+            }
 
     /* Flag to optimize unnecessary setState calls */
     private var isDirty = false
@@ -56,8 +56,8 @@ open class CompoundDrawablesController(
     }
 
     override fun setCompoundDrawableClickStrategy(
-        index: Int,
-        behaviour: ICompoundDrawableBehaviour
+            index: Int,
+            behaviour: ICompoundDrawableBehaviour
     ) {
         val virtualView = virtualViews[index]
         drawableClickStrategies[index].onDetach()
@@ -106,8 +106,23 @@ open class CompoundDrawablesController(
         return handled
     }
 
-    override fun onAttachedToWindow() {
-        setCompoundDrawables(host.compoundDrawables)
+    override fun onAttachedToWindow(pendingDrawables: Array<Drawable?>) {
+        //set drawables from through our delegate
+        //needs to be done later, because of rtl resolution
+        val viewsDrawables = host.compoundDrawables
+        pendingDrawables.forEachIndexed { i, d ->
+            //prefer already set drawables, could be from code, right after inflation
+            viewsDrawables[i] = viewsDrawables[i] ?: d
+            pendingDrawables[i] = null
+        }
+
+        viewsDrawables.forEach { v ->
+            //set only views with obviously empty bounds
+            //if there was something in code already set, just ignore it
+            v?.takeIf { it.dirtyBounds.isEmpty }
+                    ?.let { it.setBounds(0, 0, it.intrinsicWidth, it.intrinsicHeight) }
+        }
+        setCompoundDrawables(viewsDrawables)
     }
 
     protected open fun dispatchClick(view: VirtualView) {
