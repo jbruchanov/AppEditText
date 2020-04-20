@@ -38,7 +38,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         get() = _virtualView
             ?: throw NullPointerException("virtualView is null, invalid lifecycle usage")
 
-    override val isImportantForAccessibility: Boolean get() = virtualView.drawable != null
+    override val isImportantForAccessibility: Boolean get() = _virtualView?.drawable != null
 
     @CallSuper
     override fun onAttach(virtualView: VirtualView) {
