@@ -14,7 +14,6 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
-import com.scurab.android.appedittext.ViewTag.Companion.getBagItem
 import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
 import com.scurab.android.appedittext.drawable.CompoundDrawablesAccessibilityDelegate
 import com.scurab.android.appedittext.drawable.CompoundDrawablesController
@@ -147,7 +146,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
-        val count = if (isInitialized) statesCount else 0
+        val count = if (isInitialized) customStatesCount else 0
         val states = super.onCreateDrawableState(extraSpace + 1 + count)
         states[states.size - 1] = R.attr.state_error * isInError.sign()
         if (count > 0) {

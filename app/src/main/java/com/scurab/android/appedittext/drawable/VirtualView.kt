@@ -70,7 +70,7 @@ open class VirtualView(
             }
             result
         }
-        return if (viewStateBag.statesCount > 0) {
+        return if (viewStateBag.customStatesCount > 0) {
             //in this case, memory grow can quickly go up with we already have 6 states, another
             //4 will be 2^10 array of 1024 arrays.
             //usage of custom states will be quite rare usecase, so let's keep it simple and potentially optimise later

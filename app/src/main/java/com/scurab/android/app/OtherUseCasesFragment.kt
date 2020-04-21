@@ -38,12 +38,6 @@ class OtherUseCasesFragment : Fragment() {
             }
 
             views.case2.apply {
-                registerCustomStates(intArrayOf(
-                        R.attr.state_pwd_strength_bad,
-                        R.attr.state_pwd_strength_weak,
-                        R.attr.state_pwd_strength_good,
-                        R.attr.state_pwd_strength_perfect))
-
                 addTextChangedListener(object : TextWatcher {
                     private val states = intArrayOf(
                             R.attr.state_pwd_strength_bad,

@@ -28,15 +28,14 @@ interface IViewStateBag : IBagItem {
     fun setCustomState(@AttrRes stateId: Int, enabled: Boolean)
     fun setCustomStates(states: IntArray)
     fun getCustomStates(): IntArray
-    fun registerCustomStates(states: IntArray)
-    val statesCount: Int
+    val customStatesCount: Int
 }
 
 open class ViewStateBag : IViewStateBag, IBagItem {
     private var view: View? = null
     private val map = TreeMap<Int, Boolean>()
     private var data: IntArray? = null
-    override val statesCount get() = map.size
+    override val customStatesCount get() = map.size
 
     override fun View.initStateBag() {
         check(this@ViewStateBag.view == null) { "ViewStateBag has been already initialised with ${this@ViewStateBag.view}" }
@@ -51,29 +50,23 @@ open class ViewStateBag : IViewStateBag, IBagItem {
     }
 
     override fun setCustomStates(states: IntArray) {
-        states.forEach { it ->
+        states.forEach {
             val stateId = abs(it)
-            check(map.contains(stateId))
             map[stateId] = it > 0
         }
         view?.refreshDrawableState()
     }
 
     override fun getCustomStates(): IntArray {
+        if (map.size != (data?.size ?: 0)) {
+            data = IntArray(map.size)
+        }
         return data?.let { data ->
             map.keys.forEachIndexed { index, i ->
                 data[index] = if (map[i] == true) i else -i
             }
             data
         } ?: Empty
-    }
-
-    override fun registerCustomStates(states: IntArray) {
-        check(map.isEmpty()) { "View has already registered ${map.size} custom states" }
-        if (states.isNotEmpty()) {
-            states.forEach { map[it] = false }
-            data = IntArray(states.size)
-        }
     }
 
     companion object {
