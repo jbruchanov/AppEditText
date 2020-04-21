@@ -1,10 +1,91 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?><!--<selector xmlns:android="http://schemas.android.com/apk/res/android">-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:enterFadeDuration="250"
+    android:exitFadeDuration="250">
+    <item app:state_pwd_strength_perfect="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/input_field_radius" />
+                    <stroke android:width="@dimen/input_field_stroke_width" android:color="#000" />
+                </shape>
+            </item>
+            <item>
+                <inset>
+                    <shape android:shape="rectangle">
+                        <corners android:radius="@dimen/input_field_radius" />
+                        <solid android:color="@color/input_pwd_strength_background" />
+                        <stroke android:width="@dimen/input_field_stroke_width" android:color="#0000" />
+                    </shape>
+                </inset>
+            </item>
+        </layer-list>
+    </item>
+    <item app:state_pwd_strength_good="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/input_field_radius" />
+                    <stroke android:width="@dimen/input_field_stroke_width" android:color="#000" />
+                </shape>
+            </item>
+            <item>
+                <inset android:insetRight="25%">
+                    <shape android:shape="rectangle">
+                        <corners android:radius="@dimen/input_field_radius" />
+                        <solid android:color="@color/input_pwd_strength_background" />
+                        <stroke android:width="@dimen/input_field_stroke_width" android:color="#0000" />
+                    </shape>
+                </inset>
+            </item>
+        </layer-list>
+    </item>
+    <item app:state_pwd_strength_weak="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/input_field_radius" />
+                    <stroke android:width="@dimen/input_field_stroke_width" android:color="#000" />
+                </shape>
+            </item>
+            <item>
+                <inset android:insetRight="50%">
+                    <shape android:shape="rectangle">
+                        <corners android:radius="@dimen/input_field_radius" />
+                        <solid android:color="@color/input_pwd_strength_background" />
+                        <stroke android:width="@dimen/input_field_stroke_width" android:color="#0000" />
+                    </shape>
+                </inset>
+            </item>
+        </layer-list>
+    </item>
+    <item app:state_pwd_strength_bad="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/input_field_radius" />
+                    <stroke android:width="@dimen/input_field_stroke_width" android:color="#000" />
+                </shape>
+            </item>
+            <item>
+                <inset android:insetRight="75%">
+                    <shape android:shape="rectangle">
+                        <corners android:radius="@dimen/input_field_radius" />
+                        <solid android:color="@color/input_pwd_strength_background" />
+                        <stroke android:width="@dimen/input_field_stroke_width" android:color="#0000" />
+                    </shape>
+                </inset>
+            </item>
+        </layer-list>
+    </item>
     <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/input_field_radius" />
-            <solid android:color="@color/input_pwd_strength" />
-            <stroke android:width="@dimen/input_field_stroke_width" android:color="@color/input_field_default" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/input_field_radius" />
+                    <stroke android:width="@dimen/input_field_stroke_width" android:color="#000" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

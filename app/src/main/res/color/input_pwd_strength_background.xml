@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:color="@color/pwd_strength_bad" android:state_focused="true" app:state_pwd_strength_bad="true" />
+    <item android:color="@color/pwd_strength_weak" android:state_focused="true" app:state_pwd_strength_weak="true" />
+    <item android:color="@color/pwd_strength_good" android:state_focused="true" app:state_pwd_strength_good="true" />
+    <item android:color="@color/pwd_strength_perfect" android:state_focused="true" app:state_pwd_strength_perfect="true" />
+    <item android:color="@color/pwd_strength_empty" android:state_focused="true" />
+    <item android:color="@color/pwd_strength_bad_background" app:state_pwd_strength_bad="true" />
+    <item android:color="@color/pwd_strength_weak_background" app:state_pwd_strength_weak="true" />
+    <item android:color="@color/pwd_strength_good_background" app:state_pwd_strength_good="true" />
+    <item android:color="@color/pwd_strength_perfect_background" app:state_pwd_strength_perfect="true" />
+    <item android:color="@color/pwd_strength_empty" />
+</selector>

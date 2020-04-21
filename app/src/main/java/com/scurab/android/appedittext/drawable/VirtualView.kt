@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.ViewStateBag
-import com.scurab.android.appedittext.ViewTag.Companion.getBagItem
+import com.scurab.android.appedittext.ViewTag.Companion.requireBagItem
 import com.scurab.android.appedittext.sign
 import java.util.Locale
 import kotlin.math.abs
@@ -42,7 +42,7 @@ open class VirtualView(
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
-    private val customStates get() = host.getBagItem(ViewStateBag.ViewStatesTag)
+    private val viewStateBag get() = host.requireBagItem(ViewStateBag.ViewStatesTag)
 
     //TODO: is this check enough ?
     //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird as it's like
@@ -63,13 +63,19 @@ open class VirtualView(
     //same "idea" what is used in android's StateSet
     private fun stateReuseStaticArrays(): IntArray {
         val index = booleansToBitMask(isFocused, isEnabled, isPressed, isChecked, isCheckable, isInError)
-        return InternalStates.setIfNull(index) {
+        val result = InternalStates.setIfNull(index) {
             val result = IntArray(StatePromises.size)
             StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
                 result[i] = attr * isAttrStateActive(this).sign()
             }
             result
         }
+        return if (viewStateBag.statesCount > 0) {
+            //in this case, memory grow can quickly go up with we already have 6 states, another
+            //4 will be 2^10 array of 1024 arrays.
+            //usage of custom states will be quite rare usecase, so let's keep it simple and potentially optimise later
+            viewStateBag.getCustomStates() + result
+        } else result
     }
 
     open fun onTouchEvent(event: MotionEvent): Boolean {

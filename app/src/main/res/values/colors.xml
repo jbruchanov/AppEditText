@@ -17,11 +17,21 @@
     <color name="input_field_focused">#333</color>
     <color name="input_field_pressed">#000</color>
 
-    <color name="pwd_strength_empty">#0FFF</color>
+    <color name="pwd_strength_empty">#8000</color>
     <color name="pwd_strength_bad">#8F00</color>
     <color name="pwd_strength_weak">#80FF6F00</color>
-    <color name="pwd_strength_good">#80EEFF00</color>
-    <color name="pwd_strength_perfect">#8008FF00</color>
+    <color name="pwd_strength_good">#808E9800</color>
+    <color name="pwd_strength_perfect">#80048E00</color>
+    <color name="pwd_strength_empty_focused">#000</color>
+    <color name="pwd_strength_bad_focused">#F00</color>
+    <color name="pwd_strength_weak_focused">#FF6F00</color>
+    <color name="pwd_strength_good_focused">#8E9800</color>
+    <color name="pwd_strength_perfect_focused">#048E00</color>
+
+    <color name="pwd_strength_bad_background">#2F00</color>
+    <color name="pwd_strength_weak_background">#20FF6F00</color>
+    <color name="pwd_strength_good_background">#208E9800</color>
+    <color name="pwd_strength_perfect_background">#20048E00</color>
 
     <color name="transparent">#00FFFFFF</color>
     <color name="white">#FFF</color>

@@ -18,7 +18,7 @@ open class ViewTag<T : IBagItem>(override val tagId: Int) : IViewTag<T> {
     companion object {
         fun <T : IBagItem> View.setBagItem(tag: IViewTag<T>, item: T) = setTag(tag.tagId, item)
         fun <T : IBagItem> View.getBagItem(tag: IViewTag<T>): T? = getTag(tag.tagId) as T?
-        fun <T : IBagItem> View.requireBagItem(tag: IViewTag<T>): T? = getTag(tag.tagId) as T
+        fun <T : IBagItem> View.requireBagItem(tag: IViewTag<T>): T = getTag(tag.tagId) as T
     }
 }
 

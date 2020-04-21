@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:color="@color/pwd_strength_empty_focused" android:state_pressed="true" />
     <item android:color="@color/pwd_strength_bad_focused" android:state_focused="true" app:state_pwd_strength_bad="true" />
     <item android:color="@color/pwd_strength_weak_focused" android:state_focused="true" app:state_pwd_strength_weak="true" />
     <item android:color="@color/pwd_strength_good_focused" android:state_focused="true" app:state_pwd_strength_good="true" />

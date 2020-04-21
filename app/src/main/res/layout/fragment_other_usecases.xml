@@ -48,6 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
+            android:drawableEnd="@drawable/ic_twotone_cancel_24"
+            android:paddingEnd="10dp"
             android:background="@drawable/input_pwd_strength_background"
             app:compoundDrawableEndBehaviour="clear" />
 
