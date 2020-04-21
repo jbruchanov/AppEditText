@@ -14,6 +14,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
+import com.scurab.android.appedittext.ViewTag.Companion.getBagItem
 import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
 import com.scurab.android.appedittext.drawable.CompoundDrawablesAccessibilityDelegate
 import com.scurab.android.appedittext.drawable.CompoundDrawablesController
@@ -23,7 +24,8 @@ import com.scurab.android.appedittext.drawable.bit
 
 @Suppress("MemberVisibilityCanBePrivate")
 open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-        AppCompatEditText(context, attrs, defStyleAttr) {
+        AppCompatEditText(context, attrs, defStyleAttr),
+        IViewStateBag by ViewStateBag() {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(
@@ -145,9 +147,14 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
-        val state = super.onCreateDrawableState(extraSpace + 1)
-        state[state.size - 1] = R.attr.state_error * isInError.sign()
-        return state
+        val count = if (isInitialized) statesCount else 0
+        val states = super.onCreateDrawableState(extraSpace + 1 + count)
+        states[states.size - 1] = R.attr.state_error * isInError.sign()
+        if (count > 0) {
+            val customStates = getCustomStates()
+            System.arraycopy(customStates, 0, states, states.size - 1 - count, customStates.size)
+        }
+        return states
     }
 
     override fun drawableStateChanged() {
@@ -198,7 +205,12 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         super.onRestoreInstanceState(superState)
     }
 
+    //keep track when we have returned from parent ctor,
+    //some overridden methods are called from super and could crash because we don't have initialised fields yet
+    private var isInitialized = false
     init {
+        @Suppress("LeakingThis")
+        initStateBag()
         attrs?.let { attrs ->
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.AppEditText)
             val rtl = RtlDrawableIndexes(context)
@@ -232,6 +244,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
                     }
             typedArray.recycle()
         }
+        isInitialized = true
     }
 
     companion object {

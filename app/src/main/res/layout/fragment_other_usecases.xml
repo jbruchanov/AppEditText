@@ -21,7 +21,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-
             <com.scurab.android.appedittext.AppEditText
                 android:id="@+id/case1"
                 android:layout_width="0dp"
@@ -38,6 +37,19 @@
                 android:text="Error"/>
 
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password strength, longer = better" />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:background="@drawable/input_pwd_strength_background"
+            app:compoundDrawableEndBehaviour="clear" />
 
     </LinearLayout>
 </ScrollView>

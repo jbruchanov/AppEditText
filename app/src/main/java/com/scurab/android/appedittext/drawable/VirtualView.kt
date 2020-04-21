@@ -9,17 +9,26 @@ import android.view.ViewConfiguration
 import android.widget.TextView
 import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
+import com.scurab.android.appedittext.ViewStateBag
+import com.scurab.android.appedittext.ViewTag.Companion.getBagItem
 import com.scurab.android.appedittext.sign
 import java.util.Locale
 import kotlin.math.abs
 
-open class VirtualView(
-    val id: Int,
-    val host: TextView,
-    val touchListener: (Int, VirtualView) -> Unit
-) {
 
-    val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
+interface IVirtualView {
+    val id: Int
+    val host: View
+    val rect: Rect
+}
+
+open class VirtualView(
+        override val id: Int,
+        override val host: TextView,
+        val touchListener: (Int, VirtualView) -> Unit
+) : IVirtualView {
+
+    override val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
     var drawable: WrappingDrawable? = null
         set(value) {
             if (value == null) {
@@ -33,6 +42,8 @@ open class VirtualView(
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
     val isInError get() = (host as? AppEditText)?.isInError ?: false
+    private val customStates get() = host.getBagItem(ViewStateBag.ViewStatesTag)
+
     //TODO: is this check enough ?
     //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird as it's like
     //frozen ripple
@@ -42,8 +53,8 @@ open class VirtualView(
 
     fun layout(layout: LayoutStrategy) {
         drawable
-            ?.let { layout(it, host, rect) }
-            ?: rect.setEmpty()
+                ?.let { layout(it, host, rect) }
+                ?: rect.setEmpty()
     }
 
     private fun state() = stateReuseStaticArrays()
@@ -137,13 +148,13 @@ open class VirtualView(
             val state = state()
             val set = it.setStateReal(state)
             val name = host.id
-                .takeIf { it != View.NO_ID }
-                ?.let { host.resources.getResourceName(it) }
-                ?: ""
+                    .takeIf { it != View.NO_ID }
+                    ?.let { host.resources.getResourceName(it) }
+                    ?: ""
 
             Log.d(
-                "VirtualViewState",
-                ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}")
+                    "VirtualViewState",
+                    ("$name[$id] = State[${set.bit()}]:'${dumpState(state)}' {${state}")
             )
             if (set) {
                 it.invalidateSelf()
@@ -182,12 +193,12 @@ open class VirtualView(
         //If this was broken, UI states weren't changing as expected
         //TODO:  extract this into own place, so anyone could add new state more easily with hiding the complexity about these arrays
         private val StatePromises = arrayOf<Pair<Int, (VirtualView) -> Boolean>>(
-            android.R.attr.state_enabled to { v -> v.isEnabled },
-            android.R.attr.state_focused to { v -> v.isFocused },
-            android.R.attr.state_pressed to { v -> v.isPressed },
-            android.R.attr.state_checkable to { v -> v.isCheckable },
-            android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },
-            R.attr.state_error to { v -> v.isInError }
+                android.R.attr.state_enabled to { v -> v.isEnabled },
+                android.R.attr.state_focused to { v -> v.isFocused },
+                android.R.attr.state_pressed to { v -> v.isPressed },
+                android.R.attr.state_checkable to { v -> v.isCheckable },
+                android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },
+                R.attr.state_error to { v -> v.isInError }
         )
         private val InternalStates = arrayOfNulls<IntArray>(1 shl StatePromises.size)
     }
@@ -207,7 +218,7 @@ fun Boolean.bit(shift: Int = 0): Int {
     return (if (this) 1 else 0) shl shift
 }
 
-fun booleansToBitMask(vararg items: Boolean) : Int {
+fun booleansToBitMask(vararg items: Boolean): Int {
     require(items.size <= 32) { "Maximum size for Int bitmask 32, passed args:${items.size}" }
     return items.foldIndexed(0) { i, acc, v -> acc xor v.bit(i) }
 }

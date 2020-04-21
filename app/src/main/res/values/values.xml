@@ -12,4 +12,8 @@
     <dimen name="input_field_radius">5dp</dimen>
     <!-- just workaround for not perfect assets -->
     <dimen name="drawable_icon_size">44dp</dimen>
+
+
+
+    <item name="tag_viewbag" type="id" />
 </resources>
