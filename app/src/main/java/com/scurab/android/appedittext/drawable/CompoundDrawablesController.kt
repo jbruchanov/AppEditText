@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.scurab.android.app.toShortString
+import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.RtlDrawableIndexes
 
 interface ICompoundDrawablesController {
@@ -26,7 +27,7 @@ interface ICompoundDrawablesController {
 }
 
 open class CompoundDrawablesController(
-        override val host: TextView
+        override val host: AppEditText
 ) : ICompoundDrawablesController {
 
     private val drawablesHelper = RtlDrawableIndexes(host.context)

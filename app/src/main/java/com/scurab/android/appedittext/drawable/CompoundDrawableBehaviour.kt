@@ -143,7 +143,7 @@ abstract class CompoundDrawableBehaviour private constructor(
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
             virtualView.host.addTextChangedListener(textWatcher)
-            textWatcher.onTextChanged(virtualView.host.text, 0, -1, virtualView.host.text.length)
+            textWatcher.onTextChanged(virtualView.host.text, 0, -1, virtualView.host.text?.length ?: 0)
         }
 
         override fun onDetach() {
@@ -155,7 +155,7 @@ abstract class CompoundDrawableBehaviour private constructor(
 
     open class ClearButton : HideOnEmptyTextBehaviour(R.string.a11y_action_clear_text) {
         override fun onClick() {
-            virtualView.host.text = ""
+            virtualView.host.text?.clear()
             //unclear what to do ?
             virtualView.host.post { virtualView.host.requestFocusFromTouch() }
         }

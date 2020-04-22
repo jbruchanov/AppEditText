@@ -24,7 +24,7 @@ interface IVirtualView {
 
 open class VirtualView(
         override val id: Int,
-        override val host: TextView,
+        override val host: AppEditText,
         val touchListener: (Int, VirtualView) -> Unit
 ) : IVirtualView {
 
