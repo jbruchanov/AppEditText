@@ -38,10 +38,10 @@ open class VirtualView(
         }
 
     var isPressed: Boolean = false
-    var isCheckable: Boolean = false
     var isChecked: Boolean = false
     val isEnabled get() = host.isEnabled
-    val isInError get() = (host as? AppEditText)?.isInError ?: false
+    val isError get() = host.isError
+    val isSuccess get() = host.isSuccess
     private val viewStateBag get() = host.requireBagItem(ViewStateBag.ViewStatesTag)
 
     //TODO: is this check enough ?
@@ -62,7 +62,10 @@ open class VirtualView(
     //seems to be only working solution for different cases
     //same "idea" what is used in android's StateSet
     private fun stateReuseStaticArrays(): IntArray {
-        val index = booleansToBitMask(isFocused, isEnabled, isPressed, isChecked, isCheckable, isInError)
+        //for more states, consider ignoring this global int[][],
+        //this might be memory heavy, we could've (2^n + 1) arrays in the worst case
+        //in real, most likely states changing are "isFocused, isEnabled, isPressed" + few other edge cases
+        val index = booleansToBitMask(isFocused, isEnabled, isPressed, isChecked, isError, isSuccess)
         val result = InternalStates.setIfNull(index) {
             val result = IntArray(StatePromises.size)
             StatePromises.forEachIndexed { i, (attr, isAttrStateActive) ->
@@ -185,6 +188,7 @@ open class VirtualView(
                 android.R.attr.state_checkable -> "checkable"
                 android.R.attr.state_checked -> "checked"
                 R.attr.state_error -> "error"
+                R.attr.state_success -> "success"
                 else -> v.toString()
             }.let { if (v < 0) it.toLowerCase(Locale.UK) else it.toUpperCase(Locale.UK) }
         }.joinToString(", ")
@@ -202,9 +206,9 @@ open class VirtualView(
                 android.R.attr.state_enabled to { v -> v.isEnabled },
                 android.R.attr.state_focused to { v -> v.isFocused },
                 android.R.attr.state_pressed to { v -> v.isPressed },
-                android.R.attr.state_checkable to { v -> v.isCheckable },
-                android.R.attr.state_checked to { v -> v.isCheckable && v.isChecked },
-                R.attr.state_error to { v -> v.isInError }
+                android.R.attr.state_checked to { v -> v.isChecked },
+                R.attr.state_error to { v -> v.isError },
+                R.attr.state_success to { v -> v.isSuccess }
         )
         private val InternalStates = arrayOfNulls<IntArray>(1 shl StatePromises.size)
     }

@@ -12,6 +12,7 @@ import android.util.StateSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.scurab.android.appedittext.R
@@ -62,28 +63,14 @@ class DefinedUseCasesFragment : Fragment() {
 
             views.case11.let { edittext ->
                 val isInError = { t: CharSequence? -> (t?.length ?: 0) in (1..5) }
-                edittext.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {}
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        edittext.isInError = isInError(s)
-                    }
-                })
-                edittext.isInError = isInError(edittext.text)
+                edittext.onTextChanged { edittext.isError = isInError(it) }
+                edittext.isError = isInError(edittext.text)
             }
 
             views.case12.let { editText ->
                 val isInError = { t: CharSequence? -> t?.all { Character.isDigit(it) } ?: false }
-                editText.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {}
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                    }
-
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        editText.isInError = isInError(s)
-                    }
-                })
-                editText.isInError = isInError(editText.text)
+                editText.onTextChanged { editText.isError = isInError(it) }
+                editText.isError = isInError(editText.text)
             }
 
             views.case13.apply {
@@ -99,6 +86,20 @@ class DefinedUseCasesFragment : Fragment() {
                     }
                 })
             }
+
+            views.case14.apply {
+                onTextChanged {
+                    val len = it?.length ?: 0
+                    when {
+                        len in 1..3 -> isError = true
+                        len > 6 -> isSuccess = true
+                        else -> {
+                            isError = false
+                            isSuccess = false
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -110,5 +111,19 @@ class DefinedUseCasesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         views = null
+    }
+}
+
+fun TextView.onTextChanged(onTextChanged: (s: CharSequence?) -> Unit) : TextWatcher {
+    return textWatcher(onTextChanged).also { addTextChangedListener(it) }
+}
+
+fun textWatcher(onTextChanged: (s: CharSequence?) -> Unit): TextWatcher {
+    return object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {}
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            onTextChanged(s)
+        }
     }
 }

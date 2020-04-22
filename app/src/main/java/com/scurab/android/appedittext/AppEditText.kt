@@ -42,11 +42,31 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     /**
      * Error state for the view.
      * To reflect the state in drawables use ```app:state_error="true"``` on particular drawable in StateListDrawable
+     * Mutual exclusive with [isSuccess]
      */
-    open var isInError: Boolean = false
+    open var isError: Boolean = false
         set(value) {
             if (value != field) {
                 field = value
+                if(isError) {
+                    isSuccess = false
+                }
+                refreshDrawableState()
+            }
+        }
+
+    /**
+     * Susccess state for the view.
+     * To reflect the state in drawables use ```app:state_success="true"``` on particular drawable in StateListDrawable
+     * Mutual exclusive with [isError]
+     */
+    open var isSuccess: Boolean = false
+        set(value) {
+            if (value != field) {
+                field = value
+                if(isSuccess) {
+                    isError = false
+                }
                 refreshDrawableState()
             }
         }
@@ -145,13 +165,22 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         return onTouchEvent || super.dispatchTouchEvent(event)
     }
 
+    private val internalStates = listOf(
+            {R.attr.state_success * isSuccess.sign()},
+            {R.attr.state_error * isError.sign()}
+    )
+
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
-        val count = if (isInitialized) customStatesCount else 0
-        val states = super.onCreateDrawableState(extraSpace + 1 + count)
-        states[states.size - 1] = R.attr.state_error * isInError.sign()
-        if (count > 0) {
+        if(!isInitialized) return super.onCreateDrawableState(extraSpace)
+
+        val states = super.onCreateDrawableState(extraSpace + internalStates.size + customStatesCount)
+        internalStates.forEachIndexed { i, statePromise ->
+            states[states.size - i - 1] = statePromise()
+        }
+        //merge our isError/isSuccess state with any other custom
+        if (customStatesCount > 0) {
             val customStates = getCustomStates()
-            System.arraycopy(customStates, 0, states, states.size - 1 - count, customStates.size)
+            System.arraycopy(customStates, 0, states, states.size - internalStates.size - customStatesCount, customStates.size)
         }
         return states
     }
@@ -192,13 +221,13 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     override fun onSaveInstanceState(): Parcelable {
         val superState = super.onSaveInstanceState()
         return SavedState(superState).apply {
-            this.isInError = this@AppEditText.isInError
+            this.isInError = this@AppEditText.isError
         }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         val superState = (state as? SavedState)?.let {
-            this@AppEditText.isInError = it.isInError
+            this@AppEditText.isError = it.isInError
             it.superState
         } ?: state
         super.onRestoreInstanceState(superState)

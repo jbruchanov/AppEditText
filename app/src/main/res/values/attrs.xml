@@ -4,6 +4,7 @@
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a view has input focus. -->
         <attr name="state_error" format="boolean" />
+        <attr name="state_success" format="boolean" />
 
         <!-- custom states -->
         <attr name="state_pwd_strength_bad" format="boolean" />

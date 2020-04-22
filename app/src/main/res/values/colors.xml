@@ -13,6 +13,10 @@
     <color name="input_field_error_default">#600000</color>
     <color name="input_field_error_focused">#A00000</color>
     <color name="input_field_error_pressed">#F00</color>
+    <color name="input_field_success_hint">#80B05EFF</color>
+    <color name="input_field_success_default">#002F7E</color>
+    <color name="input_field_success_focused">#0043B5</color>
+    <color name="input_field_success_pressed">#005EFF</color>
     <color name="input_field_default">#666</color>
     <color name="input_field_focused">#333</color>
     <color name="input_field_pressed">#000</color>

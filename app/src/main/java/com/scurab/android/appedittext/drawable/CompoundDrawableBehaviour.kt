@@ -170,11 +170,9 @@ abstract class CompoundDrawableBehaviour private constructor(
 
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
-            virtualView.isCheckable = true
         }
 
         override fun onDetach() {
-            virtualView.isCheckable = false
             virtualView.isChecked = false
             super.onDetach()
         }
@@ -197,12 +195,10 @@ abstract class CompoundDrawableBehaviour private constructor(
 
         override fun onAttach(virtualView: VirtualView) {
             super.onAttach(virtualView)
-            virtualView.isCheckable = true
             virtualView.isChecked = virtualView.host.hasPasswordVisible
         }
 
         override fun onDetach() {
-            virtualView.isCheckable = false
             virtualView.isChecked = false
             super.onDetach()
         }

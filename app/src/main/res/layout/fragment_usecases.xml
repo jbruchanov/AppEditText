@@ -168,7 +168,7 @@
             android:id="@+id/case11"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/ic_clear"
+            android:drawableEnd="@drawable/ic_clear"
             android:text="123"
             app:compoundDrawableEndBehaviour="clear" />
 
@@ -181,7 +181,7 @@
             android:id="@+id/case12"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/ic_password"
+            android:drawableEnd="@drawable/ic_password"
             android:inputType="textPassword"
             android:text="123"
             app:compoundDrawableEndBehaviour="password" />
@@ -195,8 +195,20 @@
             android:id="@+id/case13"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/ic_right_arrow"
+            android:drawableEnd="@drawable/ic_right_arrow"
             android:text="aBcDeFgH1234" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0 Error &lt;= 3 Default &lt;= 6 Success " />
+
+        <com.scurab.android.appedittext.AppEditText
+            android:id="@+id/case14"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/ic_clear"
+            app:compoundDrawableEndBehaviour="clear" />
 
     </LinearLayout>
 </ScrollView>
