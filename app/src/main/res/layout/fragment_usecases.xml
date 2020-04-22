@@ -181,7 +181,9 @@
             android:id="@+id/case12"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableEnd="@drawable/ic_password"
+            android:drawableEnd="@drawable/ic_password_animated"
+            android:drawableTint="@color/input_field_text"
+            android:paddingEnd="5dp"
             android:inputType="textPassword"
             android:text="123"
             app:compoundDrawableEndBehaviour="password" />
