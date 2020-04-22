@@ -13,6 +13,7 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.text.BoringLayout
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -34,10 +35,6 @@ import com.scurab.android.appedittext.obtainAttributes
 import com.scurab.android.appedittext.withMultiplyingAlpha
 import org.xmlpull.v1.XmlPullParser
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 open class SuperTextDrawable() : Drawable() {
@@ -108,6 +105,7 @@ open class SuperTextDrawable() : Drawable() {
         @Px get() = paint.textSize
         set(@Px value) {
             paint.textSize = value
+            buildLayout()
             updateBoundsWithIntrinsicSize()
             invalidateSelf()
         }
@@ -170,15 +168,30 @@ open class SuperTextDrawable() : Drawable() {
             //far more complicated as it's CharSequence (having spans)
             //how to measure it properly for all cases
             //TODO: maybe naive implementation for strings only ?
-            StaticLayout(
+            val width = max(minTextWidth, paint.measureText(it, 0, it.length).ceilInt())
+            val boringMetrics = BoringLayout.isBoring(it, paint)
+            if(boringMetrics != null) {
+                BoringLayout.make(
                     it,
                     paint,
-                    max(minTextWidth, paint.measureText(it, 0, it.length).ceilInt()),
+                    width,
+                    Layout.Alignment.ALIGN_CENTER,
+                    1f,
+                    0f,
+                    boringMetrics,
+                    false
+                )
+            } else {
+                StaticLayout(
+                    it,
+                    paint,
+                    width,
                     Layout.Alignment.ALIGN_CENTER,
                     1f/*extra line spacing * coef */,
                     0f/*extra line spacing + coef */,
                     false/*include font padding?*/
-            )
+                )
+            }
         }
     }
 
