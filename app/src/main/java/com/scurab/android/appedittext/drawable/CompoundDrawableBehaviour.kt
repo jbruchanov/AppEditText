@@ -113,7 +113,6 @@ abstract class CompoundDrawableBehaviour private constructor(
     }
 
     abstract class HideOnEmptyTextBehaviour(@StringRes contentDescription: Int) : CompoundDrawableBehaviour(contentDescription) {
-        private var drawable: WrappingDrawable? = null
         private val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -121,23 +120,13 @@ abstract class CompoundDrawableBehaviour private constructor(
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 //pick the predefined or from view
                 //doesn't have to be known in onAttach
-                drawable = drawable ?: virtualView.drawable
                 val isEmpty = s?.length == 0
                 val wasEmpty = before == 0
                 if (isEmpty xor wasEmpty) {
                     //cancels ripple effect, it would appear when shown again
-                    drawable?.jumpToCurrentState()
-                    dispatchUpdateDrawable(if (isEmpty) null else drawable)
+                    virtualView.isVisible = !isEmpty
                 }
             }
-        }
-
-        open fun dispatchUpdateDrawable(drawable: Drawable?) {
-            //absolute indexing is correct
-            virtualView.host.setCompoundDrawable(
-                virtualView.id,
-                drawable
-            )
         }
 
         override fun onAttach(virtualView: VirtualView) {
@@ -148,7 +137,6 @@ abstract class CompoundDrawableBehaviour private constructor(
 
         override fun onDetach() {
             virtualView.host.removeTextChangedListener(textWatcher)
-            drawable = null
             super.onDetach()
         }
     }

@@ -6,14 +6,14 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import android.widget.TextView
 import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.ViewStateBag
 import com.scurab.android.appedittext.ViewTag.Companion.requireBagItem
 import com.scurab.android.appedittext.sign
-import java.util.Locale
+import java.util.*
 import kotlin.math.abs
+import kotlin.math.roundToLong
 
 
 interface IVirtualView {
@@ -35,6 +35,15 @@ open class VirtualView(
                 rect.setEmpty()
             }
             field = value
+        }
+
+    private var _isVisible = true
+    var isVisible: Boolean
+        get() = _isVisible
+        set(value) {
+            _isVisible = value
+            drawable?.setVisible(value, false)
+            host.invalidate()
         }
 
     var isPressed: Boolean = false
@@ -82,7 +91,7 @@ open class VirtualView(
     }
 
     open fun onTouchEvent(event: MotionEvent): Boolean {
-        if (rect.isEmpty) return false
+        if (!isVisible || rect.isEmpty) return false
 
         val contains = rect.containsSlop(event.x, event.y, touchSlop)
         val x = event.x
@@ -127,11 +136,27 @@ open class VirtualView(
         return handled
     }
 
+    /*
+        Force redrawing when we are pressed.
+        Ripple sometimes struggles to finish when in scrollview.
+     */
+    private val invalidateAction = object : Runnable {
+        val fps = (1000 / 25f).roundToLong()
+        override fun run() {
+            if (isPressed) {
+                host.invalidate()
+                //under a finger thing, 25fps is far enough refreshrate
+                host.postDelayed(this, fps)
+            }
+        }
+    }
+
     protected open fun dispatchDownEvent(event: MotionEvent) {
         isPressed = true
         drawable?.let {
             setHotspot(event)
             invalidateDrawableState()
+            invalidateAction.run()
         }
     }
 

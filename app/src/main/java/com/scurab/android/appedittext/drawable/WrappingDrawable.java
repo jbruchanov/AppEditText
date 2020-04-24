@@ -51,7 +51,9 @@ public class WrappingDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void draw(Canvas canvas) {
-        mDrawable.draw(canvas);
+        if (isVisible()) {
+            mDrawable.draw(canvas);
+        }
     }
 
     @Override
