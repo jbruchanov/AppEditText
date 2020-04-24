@@ -48,7 +48,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         set(value) {
             if (value != field) {
                 field = value
-                if(isError) {
+                if (isError) {
                     isSuccess = false
                 }
                 refreshDrawableState()
@@ -64,7 +64,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         set(value) {
             if (value != field) {
                 field = value
-                if(isSuccess) {
+                if (isSuccess) {
                     isError = false
                 }
                 refreshDrawableState()
@@ -213,7 +213,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (false/*debug*/) {
+        if (true/*debug*/) {
             compoundDrawablesController.debugDraw(canvas)
         }
     }
@@ -221,13 +221,14 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     override fun onSaveInstanceState(): Parcelable {
         val superState = super.onSaveInstanceState()
         return SavedState(superState).apply {
-            this.isInError = this@AppEditText.isError
+            this.isError = this@AppEditText.isError
         }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         val superState = (state as? SavedState)?.let {
-            this@AppEditText.isError = it.isInError
+            this@AppEditText.isError = it.isError
+            this@AppEditText.isSuccess = it.isSuccess
             it.superState
         } ?: state
         super.onRestoreInstanceState(superState)
@@ -303,7 +304,8 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     class SavedState : BaseSavedState {
-        var isInError = false
+        var isError = false
+        var isSuccess = false
 
         constructor(source: Parcel) : super(source) {
             init(source)
@@ -317,12 +319,14 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         constructor(superState: Parcelable?) : super(superState)
 
         private fun init(source: Parcel?) {
-            isInError = (source?.readInt() ?: 0) == 1
+            isError = (source?.readInt() ?: 0) == 1
+            isSuccess = (source?.readInt() ?: 0) == 1
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
-            out.writeInt(isInError.bit())
+            out.writeInt(isError.bit())
+            out.writeInt(isSuccess.bit())
         }
     }
 }
