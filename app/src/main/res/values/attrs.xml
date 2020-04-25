@@ -16,6 +16,13 @@
     <attr name="labelTextAppearance"></attr>
 
     <declare-styleable name="AppEditText">
+        <attr name="android:drawableLeft" format="string" />
+        <attr name="android:drawableTop" format="string" />
+        <attr name="android:drawableRight" format="string" />
+        <attr name="android:drawableBottom" format="string" />
+        <attr name="android:drawableStart" format="string" />
+        <attr name="android:drawableEnd" format="string" />
+
         <attr name="compoundDrawableStartTitle" format="string" />
         <attr name="compoundDrawableEndTitle" format="string" />
         <attr name="compoundDrawableEndBehaviour" format="enum">

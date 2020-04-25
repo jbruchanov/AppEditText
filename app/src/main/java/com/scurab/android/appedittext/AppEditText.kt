@@ -10,10 +10,12 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.View
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.ViewCompat
+import androidx.customview.view.AbsSavedState
 import com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour
 import com.scurab.android.appedittext.drawable.CompoundDrawablesAccessibilityDelegate
 import com.scurab.android.appedittext.drawable.CompoundDrawablesController
@@ -23,14 +25,14 @@ import com.scurab.android.appedittext.drawable.bit
 
 @Suppress("MemberVisibilityCanBePrivate")
 open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
-    AppCompatEditText(context, attrs, defStyleAttr),
-    IViewStateBag by ViewStateBag() {
+        AppCompatEditText(context, attrs, defStyleAttr),
+        IViewStateBag by ViewStateBag() {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(
-        context,
-        attrs,
-        R.attr.editTextStyle
+            context,
+            attrs,
+            R.attr.editTextStyle
     )
 
     /*
@@ -75,16 +77,17 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     //function calls through ctor
     @Suppress("LeakingThis")
     private val compoundDrawablesController =
-        CompoundDrawablesController(this).also {
-            ViewCompat.setAccessibilityDelegate(this, CompoundDrawablesAccessibilityDelegate(it))
-        }
+            CompoundDrawablesController(this).also {
+                ViewCompat.setAccessibilityDelegate(this, CompoundDrawablesAccessibilityDelegate(it))
+            }
 
     private var compoundDrawablesAccessibilityDelegate: CompoundDrawablesAccessibilityDelegate? = null
 
     private fun initAccessibilityDelegate() {
-        compoundDrawablesAccessibilityDelegate = CompoundDrawablesAccessibilityDelegate(compoundDrawablesController).also {
-            ViewCompat.setAccessibilityDelegate(this, it)
-        }
+        compoundDrawablesAccessibilityDelegate = (compoundDrawablesAccessibilityDelegate
+                ?: CompoundDrawablesAccessibilityDelegate(compoundDrawablesController).also {
+                    ViewCompat.setAccessibilityDelegate(this, it)
+                })
     }
 
     /**
@@ -96,47 +99,27 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         compoundDrawablesController.setCompoundDrawableClickStrategyRelative(index, behaviour)
     }
 
-    private var firstAttach = true
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        //stupid google implementation of having 2 arrays for left/right or start/end
-        //resolved later and not directly in ctor call, this is necessary only for 1st time
-        //let's merge them and as we need all of them(relative is prio since API17)
-        if (firstAttach) {
-            firstAttach = false
-            val viewDrawables = compoundDrawablesRelative
-                .mergeWith(compoundDrawables)
-                .mergeWith(pendingDrawables)
-                .also {
-                    it.forEach { d ->
-                        if (d?.dirtyBounds?.isEmpty == true) {
-                            d.setIntrinsicBounds()
-                        }
-                    }
-                    pendingDrawables.fill(null)
-                }
-            //update and wrap if necessary
-            //does nothing if the drawables are same
-            setCompoundDrawablesRelative(viewDrawables)
-        }
-
         //TODO: if a11y enabled use initAccessibilityDelegate()
         //it works for keyboard and has side effects
     }
 
     override fun setCompoundDrawables(
-        left: Drawable?, top: Drawable?, right: Drawable?, bottom: Drawable?
+            left: Drawable?, top: Drawable?, right: Drawable?, bottom: Drawable?
     ) {
+        if (!isSuperInitialized) {
+            return
+        }
         @Suppress("IfThenToSafeAccess", "SENSELESS_COMPARISON")
         //potential ctor call
         if (!isInEditMode && compoundDrawablesController != null) {
             compoundDrawablesController.apply {
                 super.setCompoundDrawables(
-                    left?.wrapped(),
-                    top?.wrapped(),
-                    right?.wrapped(),
-                    bottom?.wrapped()
+                        left?.wrapped(),
+                        top?.wrapped(),
+                        right?.wrapped(),
+                        bottom?.wrapped()
                 )
             }
             compoundDrawablesAccessibilityDelegate?.invalidateRoot()
@@ -146,15 +129,18 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun setCompoundDrawablesRelative(start: Drawable?, top: Drawable?, end: Drawable?, bottom: Drawable?) {
+        if (!isSuperInitialized) {
+            return
+        }
         @Suppress("SENSELESS_COMPARISON")
         //potential ctor call
         if (!isInEditMode && compoundDrawablesController != null) {
             compoundDrawablesController.apply {
                 super.setCompoundDrawablesRelative(
-                    start?.wrapped(),
-                    top?.wrapped(),
-                    end?.wrapped(),
-                    bottom?.wrapped()
+                        start?.wrapped(),
+                        top?.wrapped(),
+                        end?.wrapped(),
+                        bottom?.wrapped()
                 )
                 compoundDrawablesAccessibilityDelegate?.invalidateRoot()
             }
@@ -174,12 +160,12 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     private val internalStates = listOf(
-        { R.attr.state_success * isSuccess.sign() },
-        { R.attr.state_error * isError.sign() }
+            { R.attr.state_success * isSuccess.sign() },
+            { R.attr.state_error * isError.sign() }
     )
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
-        if (!isInitialized) return super.onCreateDrawableState(extraSpace)
+        if (!isSuperInitialized) return super.onCreateDrawableState(extraSpace)
 
         val states = super.onCreateDrawableState(extraSpace + internalStates.size + customStatesCount)
         internalStates.forEachIndexed { i, statePromise ->
@@ -214,9 +200,9 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
         compoundDrawablesAccessibilityDelegate?.onFocusChanged(
-            gainFocus,
-            direction,
-            previouslyFocusedRect
+                gainFocus,
+                direction,
+                previouslyFocusedRect
         )
     }
 
@@ -229,62 +215,73 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        val superState = super.onSaveInstanceState()
-        return SavedState(superState).apply {
+        return SavedState(super.onSaveInstanceState()!!).apply {
             this.isError = this@AppEditText.isError
+            this.isSuccess = this@AppEditText.isSuccess
         }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        val superState = (state as? SavedState)?.let {
-            this@AppEditText.isError = it.isError
-            this@AppEditText.isSuccess = it.isSuccess
-            it.superState
-        } ?: state
-        super.onRestoreInstanceState(superState)
+        val state = state as? SavedState
+        if (state != null) {
+            super.onRestoreInstanceState(state.superState)
+            this@AppEditText.isError = state.isError
+            this@AppEditText.isSuccess = state.isSuccess
+        } else {
+            super.onRestoreInstanceState(state)
+        }
     }
 
     //keep track when we have returned from parent ctor,
     //some overridden methods are called from super and could crash because we don't have initialised fields yet
-    private var isInitialized = false
+    private var isSuperInitialized = false
 
     init {
+        isSuperInitialized = true
         @Suppress("LeakingThis")
         initStateBag()
         attrs?.let { attrs ->
-            val typedArray = context.obtainStyledAttributes(attrs, R.styleable.AppEditText)
             val rtl = RtlDrawableIndexes(context)
+            val typedArray = context.obtainStyledAttributes(attrs, R.styleable.AppEditText)
             (0 until typedArray.indexCount)
-                .forEach {
-                    when (val index = typedArray.getIndex(it)) {
-                        R.styleable.AppEditText_compoundDrawableStartTitle -> {
-                            //TODO: default styling
-                            pendingDrawables[rtl.left] = SuperTextDrawable(
-                                typedArray.getText(index),
-                                context,
-                                R.style.labelTextAppearance
-                            )
-                        }
-                        R.styleable.AppEditText_compoundDrawableEndTitle -> {
-                            //TODO: default styling
-                            pendingDrawables[rtl.right] = SuperTextDrawable(
-                                typedArray.getText(index),
-                                context,
-                                R.style.labelTextAppearance
-                            )
-                        }
-                        R.styleable.AppEditText_compoundDrawableEndBehaviour -> {
-                            when (typedArray.getInt(index, BEHAVIOUR_NONE)) {
-                                BEHAVIOUR_NONE -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.None())
-                                BEHAVIOUR_CLEAR_BUTTON -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.ClearButton())
-                                BEHAVIOUR_PASSWORD -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.PasswordButton())
+                    .forEach {
+                        when (val index = typedArray.getIndex(it)) {
+                            R.styleable.AppEditText_android_drawableLeft -> pendingDrawables[rtl.left] = typedArray.getDrawable(index)
+                            R.styleable.AppEditText_android_drawableTop -> pendingDrawables[rtl.top] = typedArray.getDrawable(index)
+                            R.styleable.AppEditText_android_drawableRight -> pendingDrawables[rtl.right] = typedArray.getDrawable(index)
+                            R.styleable.AppEditText_android_drawableBottom -> pendingDrawables[rtl.bottom] = typedArray.getDrawable(index)
+                            //intentionally left/right as following will call setCompoundDrawablesRelative
+                            R.styleable.AppEditText_android_drawableStart -> pendingDrawables[rtl.left] = typedArray.getDrawable(index)
+                            R.styleable.AppEditText_android_drawableEnd -> pendingDrawables[rtl.right] = typedArray.getDrawable(index)
+                            R.styleable.AppEditText_compoundDrawableStartTitle -> {
+                                //TODO: default styling
+                                pendingDrawables[rtl.left] = SuperTextDrawable(
+                                        typedArray.getText(index),
+                                        context,
+                                        R.style.labelTextAppearance
+                                )
+                            }
+                            R.styleable.AppEditText_compoundDrawableEndTitle -> {
+                                //TODO: default styling
+                                pendingDrawables[rtl.right] = SuperTextDrawable(
+                                        typedArray.getText(index),
+                                        context,
+                                        R.style.labelTextAppearance
+                                )
+                            }
+                            R.styleable.AppEditText_compoundDrawableEndBehaviour -> {
+                                when (typedArray.getInt(index, BEHAVIOUR_NONE)) {
+                                    BEHAVIOUR_NONE -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.None())
+                                    BEHAVIOUR_CLEAR_BUTTON -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.ClearButton())
+                                    BEHAVIOUR_PASSWORD -> setCompoundDrawableBehaviourRelative(rtl.right, CompoundDrawableBehaviour.PasswordButton())
+                                }
                             }
                         }
                     }
-                }
             typedArray.recycle()
         }
-        isInitialized = true
+        setCompoundDrawablesRelativeWithIntrinsicBounds(pendingDrawables[0], pendingDrawables[1], pendingDrawables[2], pendingDrawables[3])
+        pendingDrawables.fill(null)
     }
 
     companion object {
@@ -292,51 +289,53 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         private const val BEHAVIOUR_NONE = 0
         private const val BEHAVIOUR_CLEAR_BUTTON = 1
         private const val BEHAVIOUR_PASSWORD = 2
-
-        @Keep
-        @Suppress("unused")
-        @JvmStatic
-        val CREATOR: Parcelable.ClassLoaderCreator<SavedState> =
-            object : Parcelable.ClassLoaderCreator<SavedState> {
-                @RequiresApi(Build.VERSION_CODES.N)
-                override fun createFromParcel(source: Parcel, loader: ClassLoader): SavedState {
-                    return SavedState(source, loader)
-                }
-
-                override fun createFromParcel(source: Parcel): SavedState {
-                    return SavedState(source)
-                }
-
-                override fun newArray(size: Int): Array<SavedState?> {
-                    return arrayOfNulls(size)
-                }
-            }
     }
 
-    class SavedState : BaseSavedState {
-        var isError = false
-        var isSuccess = false
+	class SavedState : BaseSavedState {
+		var isError = false
+		var isSuccess = false
 
-        constructor(source: Parcel) : super(source) {
-            init(source)
-        }
+		constructor(source: Parcel) : super(source) {
+			init(source)
+		}
 
-        @RequiresApi(Build.VERSION_CODES.N)
-        constructor(source: Parcel, loader: ClassLoader?) : super(source, loader) {
-            init(source)
-        }
+		@RequiresApi(Build.VERSION_CODES.N)
+		constructor(source: Parcel, loader: ClassLoader?) : super(source, loader) {
+			init(source)
+		}
 
-        constructor(superState: Parcelable?) : super(superState)
+		constructor(superState: Parcelable?) : super(superState)
 
-        private fun init(source: Parcel?) {
-            isError = (source?.readInt() ?: 0) == 1
-            isSuccess = (source?.readInt() ?: 0) == 1
-        }
+		private fun init(source: Parcel?) {
+			isError = (source?.readInt() ?: 0) == 1
+			isSuccess = (source?.readInt() ?: 0) == 1
+		}
 
-        override fun writeToParcel(out: Parcel, flags: Int) {
-            super.writeToParcel(out, flags)
-            out.writeInt(isError.bit())
-            out.writeInt(isSuccess.bit())
-        }
-    }
+		override fun writeToParcel(out: Parcel, flags: Int) {
+			super.writeToParcel(out, flags)
+			out.writeInt(isError.bit())
+			out.writeInt(isSuccess.bit())
+		}
+
+		companion object {
+			@Keep
+			@Suppress("unused")
+			@JvmField
+			val CREATOR: Parcelable.ClassLoaderCreator<SavedState> =
+					object : Parcelable.ClassLoaderCreator<SavedState> {
+						@RequiresApi(Build.VERSION_CODES.N)
+						override fun createFromParcel(source: Parcel, loader: ClassLoader): SavedState {
+							return SavedState(source, loader)
+						}
+
+						override fun createFromParcel(source: Parcel): SavedState {
+							return SavedState(source)
+						}
+
+						override fun newArray(size: Int): Array<SavedState?> {
+							return arrayOfNulls(size)
+						}
+					}
+		}
+	}
 }
