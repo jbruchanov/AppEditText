@@ -210,8 +210,8 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun onSaveInstanceState(): Parcelable {
         return SavedState(super.onSaveInstanceState()!!).apply {
-            this.isError = this@AppEditText.isError
-            this.isSuccess = this@AppEditText.isSuccess
+            isError = this@AppEditText.isError
+            isSuccess = this@AppEditText.isSuccess
         }
     }
 
