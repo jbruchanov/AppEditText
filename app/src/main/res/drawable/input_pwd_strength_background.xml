@@ -30,7 +30,7 @@
                 </shape>
             </item>
             <item>
-                <inset android:insetRight="25%">
+                <inset android:insetLeft="@dimen/password_strength_inset_good_left" android:insetRight="@dimen/password_strength_inset_good_right">
                     <shape android:shape="rectangle">
                         <corners android:radius="@dimen/input_field_radius" />
                         <solid android:color="@color/input_pwd_strength_background" />
@@ -49,7 +49,7 @@
                 </shape>
             </item>
             <item>
-                <inset android:insetRight="50%">
+                <inset android:insetLeft="@dimen/password_strength_inset_weak_left" android:insetRight="@dimen/password_strength_inset_weak_right">
                     <shape android:shape="rectangle">
                         <corners android:radius="@dimen/input_field_radius" />
                         <solid android:color="@color/input_pwd_strength_background" />
@@ -68,7 +68,7 @@
                 </shape>
             </item>
             <item>
-                <inset android:insetRight="75%">
+                <inset android:insetLeft="@dimen/password_strength_inset_bad_left" android:insetRight="@dimen/password_strength_inset_bad_right">
                     <shape android:shape="rectangle">
                         <corners android:radius="@dimen/input_field_radius" />
                         <solid android:color="@color/input_pwd_strength_background" />

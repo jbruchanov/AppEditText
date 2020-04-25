@@ -16,4 +16,11 @@
 
 
     <item name="tag_viewbag" type="id" />
+
+    <dimen name="password_strength_inset_bad_left">0%</dimen>
+    <dimen name="password_strength_inset_bad_right">75%</dimen>
+    <dimen name="password_strength_inset_weak_left">0%</dimen>
+    <dimen name="password_strength_inset_weak_right">50%</dimen>
+    <dimen name="password_strength_inset_good_left">0%</dimen>
+    <dimen name="password_strength_inset_good_right">25%</dimen>
 </resources>

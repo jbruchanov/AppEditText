@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="password_strength_inset_bad_left">75%</dimen>
+    <dimen name="password_strength_inset_bad_right">0%</dimen>
+    <dimen name="password_strength_inset_weak_left">50%</dimen>
+    <dimen name="password_strength_inset_weak_right">0%</dimen>
+    <dimen name="password_strength_inset_good_left">25%</dimen>
+    <dimen name="password_strength_inset_good_right">0%</dimen>
+</resources>
