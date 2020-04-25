@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import com.scurab.android.app.dumpState
 import com.scurab.android.appedittext.AppEditText
 import com.scurab.android.appedittext.R
 import com.scurab.android.appedittext.ViewStateBag
@@ -28,7 +29,10 @@ open class VirtualView(
         val touchListener: (Int, VirtualView) -> Unit
 ) : IVirtualView {
 
-    override val rect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
+    private val viewStateBag get() = host.requireBagItem(ViewStateBag.ViewStatesTag)
+    private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
+
+    override val rect = Rect()
     var drawable: WrappingDrawable? = null
         set(value) {
             if (value == null) {
@@ -38,12 +42,16 @@ open class VirtualView(
         }
 
     private var _isVisible = true
+
     var isVisible: Boolean
         get() = _isVisible
         set(value) {
             _isVisible = value
-            drawable?.setVisible(value, false)
-            host.invalidate()
+            drawable?.let {
+                it.setVisible(value, false)
+                //important to avoid any animations if being re-shown again
+                it.jumpToCurrentState()
+            }
         }
 
     var isPressed: Boolean = false
@@ -51,14 +59,8 @@ open class VirtualView(
     val isEnabled get() = host.isEnabled
     val isError get() = host.isError
     val isSuccess get() = host.isSuccess
-    private val viewStateBag get() = host.requireBagItem(ViewStateBag.ViewStatesTag)
-
-    //TODO: is this check enough ?
-    //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird as it's like
-    //frozen ripple
+    //ignore focused flag for ripple drawables, as they render RippleBackground, looks weird as it's like frozen ripple
     val isFocused get() = drawable?.wrappedDrawable !is RippleDrawable && host.isFocused
-
-    private val touchSlop = ViewConfiguration.get(host.context).scaledTouchSlop.toFloat()
 
     fun layout(layout: LayoutStrategy) {
         drawable
@@ -126,29 +128,9 @@ open class VirtualView(
             }
             MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
                 dispatchUpEvent(event, false)
-                //explicit invalidation is necessary for correct ripple finish
-                //looks like in scrollview when DOWN -> few MOVEs -> CANCEL
-                //ripple doesn't invalidate itself if pressed state changed only in our stateSet
-                //so finish ripple nicely like we "left" the view
-                host.postInvalidate()
             }
         }
         return handled
-    }
-
-    /*
-        Force redrawing when we are pressed.
-        Ripple sometimes struggles to finish when in scrollview.
-     */
-    private val invalidateAction = object : Runnable {
-        val fps = (1000 / 25f).roundToLong()
-        override fun run() {
-            if (isPressed) {
-                host.invalidate()
-                //under a finger thing, 25fps is far enough refreshrate
-                host.postDelayed(this, fps)
-            }
-        }
     }
 
     protected open fun dispatchDownEvent(event: MotionEvent) {
@@ -156,7 +138,6 @@ open class VirtualView(
         drawable?.let {
             setHotspot(event)
             invalidateDrawableState()
-            invalidateAction.run()
         }
     }
 
@@ -202,21 +183,6 @@ open class VirtualView(
             val y = event.y - rect.top
             it.setHotspot(x, y)
         }
-    }
-
-    private fun dumpState(state: IntArray): String {
-        return state.map { v ->
-            when (abs(v)) {
-                android.R.attr.state_focused -> "focused"
-                android.R.attr.state_enabled -> "enabled"
-                android.R.attr.state_pressed -> "pressed"
-                android.R.attr.state_checkable -> "checkable"
-                android.R.attr.state_checked -> "checked"
-                R.attr.state_error -> "error"
-                R.attr.state_success -> "success"
-                else -> v.toString()
-            }.let { if (v < 0) it.toLowerCase(Locale.UK) else it.toUpperCase(Locale.UK) }
-        }.joinToString(", ")
     }
 
     companion object {

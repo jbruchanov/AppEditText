@@ -108,6 +108,15 @@ public class WrappingDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void invalidateSelf() {
+        //TODO: workaround for the replacing drawable by wrapped one
+        if (mDrawable.getCallback() == null) {
+            mDrawable.setCallback(this);
+        }
+        super.invalidateSelf();
+    }
+
+    @Override
     public int[] getState() {
         return mDrawable.getState();
     }
