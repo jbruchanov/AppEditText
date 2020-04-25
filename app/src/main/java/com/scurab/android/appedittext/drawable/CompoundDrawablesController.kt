@@ -33,32 +33,15 @@ open class CompoundDrawablesController(
     private val drawablesHelper = RtlDrawableIndexes(host.context)
     private val touchListener = { id: Int, view: VirtualView -> dispatchClick(view) }
     override val virtualViews = Array(4) { VirtualView(it, host, touchListener) }.toList()
-    val leftDrawable get() = left.drawable
-    val topDrawable get() = top.drawable
-    val rightDrawable get() = right.drawable
-    val bottomDrawable get() = bottom.drawable
 
     private val drawableBehaviours =
             Array<ICompoundDrawableBehaviour>(4) { i ->
                 CompoundDrawableBehaviour.None().also { it.onAttach(virtualViews[i]) }
             }
 
-    /* Flag to optimize unnecessary setState calls */
-    private var isDirty = false
-
-    //absolute positioning, RTL handled in setCompoundDrawableClickStrategyRelative
-    private val left get() = virtualViews[0]
-    private val top get() = virtualViews[1]
-    private val right get() = virtualViews[2]
-    private val bottom get() = virtualViews[3]
-
     override fun getCompoundDrawableClickStrategy(index: Int): ICompoundDrawableBehaviour {
         return drawableBehaviours[index]
     }
-
-    //another workaround for late resolving of drawables
-    //setCompoundDrawableClickStrategyRelative might be called during view creation based on attrs
-    private var attachOnLayout = false
 
     override fun setCompoundDrawableClickStrategyRelative(
             index: Int,
@@ -68,11 +51,7 @@ open class CompoundDrawablesController(
         val virtualView = virtualViews[rtlIndex]
         drawableBehaviours[rtlIndex].onDetach()
         drawableBehaviours[rtlIndex] = behaviour
-        if (!host.isLaidOut) {
-            attachOnLayout = true
-        } else {
-            behaviour.onAttach(virtualView)
-        }
+        behaviour.onAttach(virtualView)
     }
 
     override fun onLayout() {
@@ -88,12 +67,8 @@ open class CompoundDrawablesController(
                 drawable = d as WrappingDrawable?
                 layout(it)
                 invalidateDrawableState()
-                if (attachOnLayout) {
-                    drawableBehaviours[it.index].onAttach(this)
-                }
             }
         }
-        attachOnLayout = false
     }
 
     private val debugPaint by lazy {
@@ -109,9 +84,7 @@ open class CompoundDrawablesController(
         if (!host.isEnabled) {
             return false
         }
-        val handled = virtualViews.firstOrNull { it.onTouchEvent(event) } != null
-        isDirty = handled || isDirty
-        return handled
+        return virtualViews.firstOrNull { it.onTouchEvent(event) } != null
     }
 
     protected open fun dispatchClick(view: VirtualView) {

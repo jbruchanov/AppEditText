@@ -35,12 +35,6 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
             R.attr.editTextStyle
     )
 
-    /*
-        pending drawables set via xml, we have to wait until rtl it's resolved,
-        otherwise left/right compound drawables are not set and might be lost
-     */
-    private val pendingDrawables: Array<Drawable?> = arrayOfNulls<Drawable?>(4)
-
     /**
      * Error state for the view.
      * To reflect the state in drawables use ```app:state_error="true"``` on particular drawable in StateListDrawable
@@ -240,6 +234,7 @@ open class AppEditText(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         isSuperInitialized = true
         @Suppress("LeakingThis")
         initStateBag()
+		val pendingDrawables: Array<Drawable?> = arrayOfNulls<Drawable?>(4)
         attrs?.let { attrs ->
             val rtl = RtlDrawableIndexes(context)
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.AppEditText)
