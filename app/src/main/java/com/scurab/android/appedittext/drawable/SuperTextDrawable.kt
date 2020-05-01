@@ -75,7 +75,9 @@ open class SuperTextDrawable() : Drawable() {
     /**
      * Stateful text color
      */
-    var color: ColorStateList by invalidating(ColorStateList.valueOf(Color.BLACK))
+    var color: ColorStateList by invalidating(ColorStateList.valueOf(Color.BLACK)) {
+        paint.color = it.getColorForState(state, Color.BLACK)
+    }
 
     /**
      * CharSequence for easier setup of [textLayout]
@@ -365,30 +367,29 @@ open class SuperTextDrawable() : Drawable() {
         //looks like there is no simple way of doing it just by 1 attrSet
         private object StyleAttrs {
             //MIN_VALUE is to ignore textAppearance ref in textAppearance to avoid circular references
-            val textAppearance = ResPair(R.styleable.SuperTextDrawable_android_textAppearance, Int.MIN_VALUE)
-            val text = ResPair(R.styleable.SuperTextDrawable_android_text, R.styleable.CustomTextAppearance_android_text)
-            val textSize = ResPair(R.styleable.SuperTextDrawable_android_textSize, R.styleable.CustomTextAppearance_android_textSize)
-            val font = ResPair(R.styleable.SuperTextDrawable_android_font, R.styleable.CustomTextAppearance_android_font)
-            val textColor = ResPair(R.styleable.SuperTextDrawable_android_textColor, R.styleable.CustomTextAppearance_android_textColor)
-            val gravity = ResPair(R.styleable.SuperTextDrawable_android_gravity, R.styleable.CustomTextAppearance_android_gravity)
+            val textAppearance = Pair(R.styleable.SuperTextDrawable_android_textAppearance, Int.MIN_VALUE)
+            val text = Pair(R.styleable.SuperTextDrawable_android_text, R.styleable.CustomTextAppearance_android_text)
+            val textSize = Pair(R.styleable.SuperTextDrawable_android_textSize, R.styleable.CustomTextAppearance_android_textSize)
+            val font = Pair(R.styleable.SuperTextDrawable_android_font, R.styleable.CustomTextAppearance_android_font)
+            val textColor = Pair(R.styleable.SuperTextDrawable_android_textColor, R.styleable.CustomTextAppearance_android_textColor)
+            val gravity = Pair(R.styleable.SuperTextDrawable_android_gravity, R.styleable.CustomTextAppearance_android_gravity)
             val paddingHorizontal =
-                    ResPair(R.styleable.SuperTextDrawable_android_paddingHorizontal, R.styleable.CustomTextAppearance_android_paddingHorizontal)
-            val paddingVertical = ResPair(R.styleable.SuperTextDrawable_android_paddingVertical, R.styleable.CustomTextAppearance_android_paddingVertical)
-            val fontFamily = ResPair(R.styleable.SuperTextDrawable_android_fontFamily, R.styleable.CustomTextAppearance_android_fontFamily)
-            val textStyle = ResPair(R.styleable.SuperTextDrawable_android_textStyle, R.styleable.CustomTextAppearance_android_textStyle)
-            val padding = ResPair(R.styleable.SuperTextDrawable_android_padding, R.styleable.CustomTextAppearance_android_padding)
-            val minWidth = ResPair(R.styleable.SuperTextDrawable_android_minWidth, R.styleable.CustomTextAppearance_android_minWidth)
-            val minHeight = ResPair(R.styleable.SuperTextDrawable_android_minHeight, R.styleable.CustomTextAppearance_android_minHeight)
+                Pair(R.styleable.SuperTextDrawable_android_paddingHorizontal, R.styleable.CustomTextAppearance_android_paddingHorizontal)
+            val paddingVertical = Pair(R.styleable.SuperTextDrawable_android_paddingVertical, R.styleable.CustomTextAppearance_android_paddingVertical)
+            val fontFamily = Pair(R.styleable.SuperTextDrawable_android_fontFamily, R.styleable.CustomTextAppearance_android_fontFamily)
+            val textStyle = Pair(R.styleable.SuperTextDrawable_android_textStyle, R.styleable.CustomTextAppearance_android_textStyle)
+            val padding = Pair(R.styleable.SuperTextDrawable_android_padding, R.styleable.CustomTextAppearance_android_padding)
+            val minWidth = Pair(R.styleable.SuperTextDrawable_android_minWidth, R.styleable.CustomTextAppearance_android_minWidth)
+            val minHeight = Pair(R.styleable.SuperTextDrawable_android_minHeight, R.styleable.CustomTextAppearance_android_minHeight)
         }
     }
 }
 
-private class ResPair(@StyleableRes private val first: Int, @StyleableRes private val second: Int) {
-    operator fun get(i: Int): Int {
-        return when (i) {
-            0 -> first
-            1 -> second
-            else -> throw IllegalStateException("Invalid index:$i")
-        }
+private operator fun <T> Pair<T, T>.get(i: Int): T {
+    return when (i) {
+        0 -> first
+        1 -> second
+        else -> throw IllegalStateException("Invalid index:$i")
     }
 }
+
