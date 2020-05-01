@@ -16,18 +16,27 @@
     <attr name="labelTextAppearance"></attr>
 
     <declare-styleable name="AppEditText">
-        <attr name="android:drawableLeft" format="string" />
-        <attr name="android:drawableTop" format="string" />
-        <attr name="android:drawableRight" format="string" />
-        <attr name="android:drawableBottom" format="string" />
-        <attr name="android:drawableStart" format="string" />
-        <attr name="android:drawableEnd" format="string" />
+        <attr name="android:drawableLeft" format="reference" />
+        <attr name="android:drawableTop" format="reference" />
+        <attr name="android:drawableRight" format="reference" />
+        <attr name="android:drawableBottom" format="reference" />
+        <attr name="android:drawableStart" format="reference" />
+        <attr name="android:drawableEnd" format="reference" />
 
-        <attr name="compoundDrawableStartTitle" format="string" />
-        <attr name="compoundDrawableEndTitle" format="string" />
+        <attr name="compoundDrawableStartTitle" format="string|reference" />
+        <attr name="compoundDrawableEndTitle" format="string|reference" />
         <attr name="compoundDrawableEndBehaviour" format="enum">
+            <!--
+            default behaviour, no specific feature
+            com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour.None  -->
             <enum name="none" value="0" />
+            <!--
+            Clear the text on click, visible if text isNotEmpty
+            com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour.ClearButton  -->
             <enum name="clear" value="1" />
+            <!--
+            Toggle button for visibility of password
+            com.scurab.android.appedittext.drawable.CompoundDrawableBehaviour.PasswordButton  -->
             <enum name="password" value="2" />
         </attr>
     </declare-styleable>
